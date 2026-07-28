@@ -75,6 +75,7 @@ export interface Student {
 
 export interface Mentor {
   id: string;
+  employeeCode: string;
   name: string;
   title: string;
   departmentId: string;
@@ -84,6 +85,10 @@ export interface Mentor {
   avatar: string;
   assignedStudentCount: number;
   avgCgpa: number;
+  avgAttendance: number;
+  studentsWithArrears: number;
+  placementReadyCount: number;
+  status: 'Active' | 'Inactive';
   successRate: number;
   officeHours: string;
   roomNo: string;

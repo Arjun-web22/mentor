@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { Badge } from '../../components/common/Badge';
 import {
   FolderIcon,
@@ -56,6 +57,9 @@ export const DepartmentGrid: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
+
       {/* Header */}
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -125,7 +129,7 @@ export const DepartmentGrid: React.FC = () => {
               </div>
 
               <button
-                onClick={() => navigate(`/students?dept=${dept.id}`)}
+                onClick={() => navigate(`/departments/${dept.id}/mentors`)}
                 className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-2"
               >
                 <span>Open Department Portal</span>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
 import { Student } from '../../types/dashboard';
 import { Badge } from '../../components/common/Badge';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { ArrearTimeline } from '../../components/student/ArrearTimeline';
 import { AddCounselingModal } from '../../components/student/AddCounselingModal';
 import {
@@ -87,6 +88,9 @@ export const StudentProfile: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumbs />
+
       {/* Back Button Bar */}
       <div className="flex items-center justify-between">
         <button

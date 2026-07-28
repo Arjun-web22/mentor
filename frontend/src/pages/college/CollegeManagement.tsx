@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
 import { Badge } from '../../components/common/Badge';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import {
   BuildingLibraryIcon,
   MagnifyingGlassIcon,
@@ -30,6 +31,9 @@ export const CollegeManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumbs />
+
       {/* Header */}
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>

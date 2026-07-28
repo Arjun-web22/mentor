@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useDashboard } from '../context/DashboardContext';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
@@ -10,6 +10,8 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { SuperAdminDashboard } from '../pages/admin/SuperAdminDashboard';
 import { CollegeManagement } from '../pages/college/CollegeManagement';
 import { DepartmentGrid } from '../pages/department/DepartmentGrid';
+import { MentorsDirectory } from '../pages/mentor/MentorsDirectory';
+import { MentorStudentsDirectory } from '../pages/student/MentorStudentsDirectory';
 import { MentorDashboard } from '../pages/mentor/MentorDashboard';
 import { StudentList } from '../pages/student/StudentList';
 import { StudentProfile } from '../pages/student/StudentProfile';
@@ -35,12 +37,30 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   );
 };
 
+const DepartmentRedirect: React.FC = () => {
+  const { departmentId } = useParams<{ departmentId: string }>();
+  return <Navigate to={`/departments/${departmentId}/mentors`} replace />;
+};
+
+const MentorRedirect: React.FC = () => {
+  const { departmentId, mentorId } = useParams<{ departmentId: string; mentorId: string }>();
+  return <Navigate to={`/departments/${departmentId}/mentors/${mentorId}/students`} replace />;
+};
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected ERP Portal Routes */}
+      {/* Protected ERP Portal Hierarchical Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedLayout>
+            <SuperAdminDashboard />
+          </ProtectedLayout>
+        }
+      />
       <Route
         path="/admin"
         element={
@@ -58,10 +78,50 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
+        path="/colleges/:collegeId"
+        element={
+          <ProtectedLayout>
+            <CollegeManagement />
+          </ProtectedLayout>
+        }
+      />
+      <Route
         path="/departments"
         element={
           <ProtectedLayout>
             <DepartmentGrid />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/departments/:departmentId"
+        element={
+          <ProtectedLayout>
+            <DepartmentRedirect />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/departments/:departmentId/mentors"
+        element={
+          <ProtectedLayout>
+            <MentorsDirectory />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/departments/:departmentId/mentors/:mentorId"
+        element={
+          <ProtectedLayout>
+            <MentorRedirect />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/departments/:departmentId/mentors/:mentorId/students"
+        element={
+          <ProtectedLayout>
+            <MentorStudentsDirectory />
           </ProtectedLayout>
         }
       />
@@ -107,7 +167,7 @@ export const AppRoutes: React.FC = () => {
       />
 
       {/* Default Fallback */}
-      <Route path="*" element={<Navigate to="/mentor" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 };
