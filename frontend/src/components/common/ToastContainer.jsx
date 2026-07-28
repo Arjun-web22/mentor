@@ -8,7 +8,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-export const ToastContainer: React.FC = () => {
+export const ToastContainer = () => {
   const { toasts, removeToast } = useDashboard();
 
   if (toasts.length === 0) return null;
@@ -32,9 +32,9 @@ export const ToastContainer: React.FC = () => {
 
           <button
             onClick={() => removeToast(toast.id)}
-            className="text-gray-400 hover:text-gray-600 p-1"
+            className="text-gray-400 hover:text-gray-600 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
-            <XMarkIcon className="w-4 h-4" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
       ))}

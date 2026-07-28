@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
-import { Student } from '../../types/dashboard';
 import { Badge } from '../../components/common/Badge';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { ArrearTimeline } from '../../components/student/ArrearTimeline';
@@ -35,12 +34,12 @@ import {
   Bar,
 } from 'recharts';
 
-export const StudentProfile: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+export const StudentProfile = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { getStudent } = useDashboard();
 
-  const [student, setStudent] = useState<Student | null>(null);
+  const [student, setStudent] = useState(null);
   const [loadingStudent, setLoadingStudent] = useState(true);
   const [isCounselingModalOpen, setIsCounselingModalOpen] = useState(false);
 
@@ -75,7 +74,7 @@ export const StudentProfile: React.FC = () => {
         </p>
         <button
           onClick={() => navigate('/students')}
-          className="px-4 py-2 bg-[#5B82C5] text-white text-xs font-bold rounded-xl"
+          className="px-4 py-2 bg-[#5B82C5] text-white text-xs font-bold rounded-xl min-h-[44px]"
         >
           Return to Student Directory
         </button>
@@ -87,23 +86,23 @@ export const StudentProfile: React.FC = () => {
   const currentSemGpa = student.gpaHistory[student.gpaHistory.length - 1]?.gpa || student.cgpa;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Breadcrumb Navigation */}
       <Breadcrumbs />
 
       {/* Back Button Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors"
+          className="px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors min-h-[44px]"
         >
           <ArrowLeftIcon className="w-4 h-4 text-[#5B82C5]" /> Back to Roster
         </button>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-start sm:justify-end">
           <button
             onClick={() => setIsCounselingModalOpen(true)}
-            className="px-4 py-2 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors"
+            className="px-4 py-2 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors min-h-[44px]"
           >
             <ChatBubbleLeftRightIcon className="w-4 h-4" /> Log Mentor Counseling
           </button>
@@ -111,27 +110,27 @@ export const StudentProfile: React.FC = () => {
       </div>
 
       {/* 1. TOP HEADER PROFILE CARD */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="flex flex-wrap items-center gap-5">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs overflow-hidden">
+        <div className="flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-6">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-5 w-full sm:w-auto">
             <img
               src={student.avatar}
               alt={student.name}
-              className="w-24 h-24 rounded-2xl object-cover border-4 border-[#5B82C5]/20 shadow-xs"
+              className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl object-cover border-4 border-[#5B82C5]/20 shadow-xs flex-shrink-0 max-w-full h-auto"
             />
-            <div>
-              <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-black text-gray-900 tracking-tight">{student.name}</h1>
+            <div className="text-center sm:text-left flex-1 min-w-0">
+              <div className="flex flex-col lg:flex-row items-center lg:items-start space-x-0 lg:space-x-3 space-y-2 lg:space-y-0">
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">{student.name}</h1>
                 <Badge variant={student.pendingArrearsCount === 0 ? 'success' : 'danger'}>
                   {student.pendingArrearsCount === 0 ? 'Regular Passing' : `${student.pendingArrearsCount} Backlogs`}
                 </Badge>
               </div>
 
-              <p className="text-xs font-bold text-gray-500 font-mono mt-1">
+              <p className="text-xs font-bold text-gray-500 font-mono">
                 REGISTER NO: {student.registerNo} • {student.departmentName}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-600 mt-3">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-xs font-semibold text-gray-600">
                 <div className="flex items-center gap-1">
                   <EnvelopeIcon className="w-4 h-4 text-[#5B82C5]" /> {student.email}
                 </div>
@@ -143,7 +142,7 @@ export const StudentProfile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center space-x-2 text-xs font-semibold text-gray-700">
+              <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-center sm:justify-start space-x-2 text-xs font-semibold text-gray-700">
                 <span className="text-gray-400">Assigned Faculty Mentor:</span>
                 <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-md border border-gray-200">
                   {student.mentorName}
@@ -153,23 +152,23 @@ export const StudentProfile: React.FC = () => {
           </div>
 
           {/* Academic Highlights Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-[#EBF1FA] p-3 rounded-xl border border-[#5B82C5]/30 text-center min-w-[90px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="bg-[#EBF1FA] p-3 rounded-xl border border-[#5B82C5]/30 text-center flex-1">
               <span className="text-[10px] font-bold text-[#5B82C5] uppercase block">Overall CGPA</span>
               <span className="text-xl font-black text-[#5B82C5]">{student.cgpa.toFixed(2)}</span>
             </div>
 
-            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-center min-w-[90px]">
+            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-center flex-1">
               <span className="text-[10px] font-bold text-emerald-700 uppercase block">Attendance</span>
               <span className="text-xl font-black text-emerald-800">{student.attendancePercentage}%</span>
             </div>
 
-            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-center min-w-[90px]">
+            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-center flex-1">
               <span className="text-[10px] font-bold text-amber-700 uppercase block">Dept Rank</span>
               <span className="text-xl font-black text-amber-900">#{student.departmentRank}</span>
             </div>
 
-            <div className="bg-sky-50 p-3 rounded-xl border border-sky-200 text-center min-w-[90px]">
+            <div className="bg-sky-50 p-3 rounded-xl border border-sky-200 text-center flex-1">
               <span className="text-[10px] font-bold text-sky-700 uppercase block">College Rank</span>
               <span className="text-xl font-black text-sky-900">#{student.collegeRank}</span>
             </div>
@@ -204,7 +203,7 @@ export const StudentProfile: React.FC = () => {
       )}
 
       {/* 3. RANKINGS SECTION (Cards) */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase">
             <span>College Rank</span>
@@ -252,18 +251,18 @@ export const StudentProfile: React.FC = () => {
       </div>
 
       {/* 4. PERFORMANCE ANALYTICS & GPA GROWTH CHART */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 gap-2">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <ChartBarIcon className="w-5 h-5 text-[#5B82C5]" /> Semester-wise GPA & CGPA Trajectory
+            <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#5B82C5]" /> Semester-wise GPA & CGPA Trajectory
             </h3>
             <p className="text-xs text-gray-500 font-medium">
               Progressive semester grade point average vs cumulative CGPA
             </p>
           </div>
 
-          <div className="flex items-center space-x-4 text-xs font-bold">
+          <div className="flex items-center space-x-3 sm:space-x-4 text-xs font-bold">
             <div className="flex items-center space-x-1.5">
               <span className="w-3 h-3 rounded-full bg-[#5B82C5]" />
               <span>Semester GPA</span>
@@ -275,16 +274,16 @@ export const StudentProfile: React.FC = () => {
           </div>
         </div>
 
-        <div className="h-64">
+        <div className="h-56 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={student.gpaHistory} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
+            <LineChart data={student.gpaHistory} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
               <XAxis
                 dataKey="semester"
-                tickFormatter={(sem: number) => `Sem ${sem}`}
-                tick={{ fontSize: 12, fontWeight: 700, fill: '#374151' }}
+                tickFormatter={(sem) => `Sem ${sem}`}
+                tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }}
               />
-              <YAxis domain={[5, 10]} tick={{ fontSize: 12, fontWeight: 700, fill: '#374151' }} />
+              <YAxis domain={[5, 10]} tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#FFFFFF',
@@ -297,16 +296,16 @@ export const StudentProfile: React.FC = () => {
                 type="monotone"
                 dataKey="gpa"
                 stroke="#5B82C5"
-                strokeWidth={3}
-                dot={{ r: 5 }}
+                strokeWidth={2}
+                dot={{ r: 4 }}
                 name="Semester GPA"
               />
               <Line
                 type="monotone"
                 dataKey="cgpa"
                 stroke="#4CAF50"
-                strokeWidth={3}
-                dot={{ r: 5 }}
+                strokeWidth={2}
+                dot={{ r: 4 }}
                 name="Cumulative CGPA"
               />
             </LineChart>
@@ -318,21 +317,21 @@ export const StudentProfile: React.FC = () => {
       <ArrearTimeline arrears={student.arrearsHistory} />
 
       {/* 6. PLACEMENT READINESS & INTERVIEW SCORE */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-100">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4 sm:space-y-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-gray-100">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <BriefcaseIcon className="w-5 h-5 text-[#5B82C5]" /> Placement Readiness & Technical Portfolio
+            <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+              <BriefcaseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#5B82C5]" /> Placement Readiness & Technical Portfolio
             </h3>
             <p className="text-xs text-gray-500 font-medium">
               Industry certifications, skill matrix, internships, and campus placement standing
             </p>
           </div>
 
-          <div className="flex items-center space-x-3 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+          <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 p-2 sm:p-2.5 rounded-xl border border-gray-200">
             <span className="text-xs font-bold text-gray-600">Interview Readiness Score:</span>
             <span
-              className={`text-sm font-black px-3 py-1 rounded-lg border ${
+              className={`text-sm font-black px-2 sm:px-3 py-1 rounded-lg border ${
                 student.interviewReadinessScore >= 80
                   ? 'bg-emerald-50 text-[#4CAF50] border-emerald-200'
                   : 'bg-amber-50 text-[#FF9800] border-amber-200'
@@ -343,7 +342,7 @@ export const StudentProfile: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Skills & Certifications */}
           <div className="space-y-4">
             <div>

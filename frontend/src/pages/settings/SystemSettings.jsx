@@ -9,29 +9,27 @@ import {
   ShieldCheckIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-import { FontScale } from '../../types/dashboard';
-
-export const SystemSettings: React.FC = () => {
+export const SystemSettings = () => {
   const { fontScale, setFontScale, addToast } = useDashboard();
   const [academicYear, setAcademicYear] = useState('2025 - 2026');
   const [minAttendance, setMinAttendance] = useState(75);
   const [highCgpaThreshold, setHighCgpaThreshold] = useState(8.5);
   const [emailAlerts, setEmailAlerts] = useState(true);
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = (e) => {
     e.preventDefault();
     addToast('success', 'System Settings Saved', 'Institutional ERP parameters updated successfully.');
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <Cog6ToothIcon className="w-7 h-7 text-[#5B82C5]" /> Institutional ERP Settings & Preferences
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <Cog6ToothIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#5B82C5]" /> Institutional ERP Settings & Preferences
           </h1>
-          <p className="text-sm font-semibold text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
             Configure system parameters, academic threshold rules, and user accessibility controls
           </p>
         </div>
@@ -41,16 +39,16 @@ export const SystemSettings: React.FC = () => {
 
       <form onSubmit={handleSaveSettings} className="space-y-6">
         {/* Senior Staff Accessibility Settings */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs space-y-4">
-          <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-            <AdjustmentsHorizontalIcon className="w-5 h-5 text-[#5B82C5]" /> Display & Font Scale Accessibility (Senior Staff 40+)
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4">
+          <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+            <AdjustmentsHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#5B82C5]" /> Display & Font Scale Accessibility (Senior Staff 40+)
           </h3>
           <p className="text-xs text-gray-500 font-medium">
             Customize typography scale for maximum visual clarity and comfortable daily reading across desktop monitors.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {(['normal', 'large', 'xlarge'] as FontScale[]).map((scale) => (
+            {(['normal', 'large', 'xlarge']).map((scale) => (
               <div
                 key={scale}
                 onClick={() => setFontScale(scale)}
@@ -75,9 +73,9 @@ export const SystemSettings: React.FC = () => {
         </div>
 
         {/* Academic Rules & Thresholds */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs space-y-4">
-          <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-            <AcademicCapIcon className="w-5 h-5 text-[#5B82C5]" /> Academic Regulation Thresholds
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4">
+          <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+            <AcademicCapIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#5B82C5]" /> Academic Regulation Thresholds
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -121,12 +119,12 @@ export const SystemSettings: React.FC = () => {
         </div>
 
         {/* Notification Preferences */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs space-y-4">
-          <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-            <BellIcon className="w-5 h-5 text-[#5B82C5]" /> Automated Email Alerts & Counseling Reminders
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4">
+          <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+            <BellIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#5B82C5]" /> Automated Email Alerts & Counseling Reminders
           </h3>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-start sm:items-center space-x-3">
             <input
               type="checkbox"
               id="email-alerts"
@@ -144,7 +142,7 @@ export const SystemSettings: React.FC = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-6 py-3 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-black text-xs rounded-xl shadow-md transition-colors"
+            className="w-full sm:w-auto px-6 py-3 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-black text-xs rounded-xl shadow-md transition-colors min-h-[44px]"
           >
             Save Configuration Changes
           </button>

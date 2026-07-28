@@ -5,6 +5,7 @@ import { StatCard } from '../../components/common/StatCard';
 import { Badge } from '../../components/common/Badge';
 import { AddCounselingModal } from '../../components/student/AddCounselingModal';
 import {
+  EyeIcon,
   AcademicCapIcon,
   UserGroupIcon,
   CheckCircleIcon,
@@ -28,12 +29,10 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { Student } from '../../types/dashboard';
-
-export const MentorDashboard: React.FC = () => {
+export const MentorDashboard = () => {
   const navigate = useNavigate();
   const { students, currentUser } = useDashboard();
-  const [selectedStudentForCounseling, setSelectedStudentForCounseling] = useState<Student | null>(null);
+  const [selectedStudentForCounseling, setSelectedStudentForCounseling] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Mentee list assigned to Dr. K. Arulraj
@@ -71,45 +70,45 @@ export const MentorDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header Profile Summary */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start space-x-0 lg:space-x-4 gap-4 w-full sm:w-auto">
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
-              className="w-16 h-16 rounded-xl object-cover border-2 border-[#5B82C5] shadow-xs"
+              className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl object-cover border-2 border-[#5B82C5] shadow-xs flex-shrink-0"
             />
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-2xl font-black text-gray-900 tracking-tight">{currentUser.name}</h1>
+            <div className="text-center sm:text-left">
+              <div className="flex flex-col lg:flex-row items-center lg:items-start space-x-0 lg:space-x-2 space-y-2 lg:space-y-0">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight">{currentUser.name}</h1>
                 <Badge variant="primary">Senior Faculty Mentor</Badge>
               </div>
-              <p className="text-xs font-bold text-gray-500 mt-0.5">
+              <p className="text-[10px] sm:text-xs font-bold text-gray-500 mt-0.5">
                 Dept of Computer Science & Engineering • Office: CS-Block 304
               </p>
-              <p className="text-xs text-gray-400 font-medium mt-0.5">
+              <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">
                 Office Hours: Mon - Fri (03:30 PM - 05:00 PM) | Direct Contact: +91 98421 11204
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
-            <div className="text-center px-3 border-r border-gray-200">
-              <span className="text-[11px] font-bold text-gray-500 uppercase block">Mentee CGPA</span>
-              <span className="text-lg font-black text-[#5B82C5]">8.28</span>
+          <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 p-2 sm:p-3 rounded-xl border border-gray-200 w-full sm:w-auto justify-center">
+            <div className="text-center px-2 sm:px-3 border-r border-gray-200">
+              <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase block">Mentee CGPA</span>
+              <span className="text-sm sm:text-base lg:text-lg font-black text-[#5B82C5]">8.28</span>
             </div>
-            <div className="text-center px-3">
-              <span className="text-[11px] font-bold text-gray-500 uppercase block">Success Rate</span>
-              <span className="text-lg font-black text-[#4CAF50]">95.8%</span>
+            <div className="text-center px-2 sm:px-3">
+              <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase block">Success Rate</span>
+              <span className="text-sm sm:text-base lg:text-lg font-black text-[#4CAF50]">95.8%</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         <StatCard
           title="Students Assigned"
           value={assignedCount}
@@ -150,39 +149,39 @@ export const MentorDashboard: React.FC = () => {
       </div>
 
       {/* Charts & Urgent Alerts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* CGPA Spectrum Chart */}
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-xs">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-xs">
           <h3 className="text-sm font-extrabold text-gray-900 mb-1">Mentee CGPA Spectrum</h3>
           <p className="text-xs text-gray-500 mb-3">Academic score grouping for assigned mentees</p>
 
-          <div className="h-52">
+          <div className="h-48 sm:h-52">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cgpaDistData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+              <BarChart data={cgpaDistData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="range" tick={{ fontSize: 11, fontWeight: 700 }} />
-                <YAxis tick={{ fontSize: 11, fontWeight: 700 }} />
+                <XAxis dataKey="range" tick={{ fontSize: 10, fontWeight: 700 }} />
+                <YAxis tick={{ fontSize: 10, fontWeight: 700 }} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#5B82C5" radius={[6, 6, 0, 0]} name="Students" />
+                <Bar dataKey="count" fill="#5B82C5" radius={[4, 4, 0, 0]} name="Students" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Arrear Breakdown Chart */}
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-xs">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-xs">
           <h3 className="text-sm font-extrabold text-gray-900 mb-1">Arrear Risk Breakdown</h3>
           <p className="text-xs text-gray-500 mb-3">Mentee distribution by backlog status</p>
 
-          <div className="h-52">
+          <div className="h-48 sm:h-52">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={arrearPieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={45}
-                  outerRadius={70}
+                  innerRadius={35}
+                  outerRadius={55}
                   paddingAngle={4}
                   dataKey="value"
                 >
@@ -235,14 +234,14 @@ export const MentorDashboard: React.FC = () => {
       </div>
 
       {/* Mentee List Table with Quick Search */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-          <div>
-            <h3 className="text-base font-extrabold text-gray-900">Assigned Mentee Roster</h3>
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+          <div className="w-full sm:w-auto">
+            <h3 className="text-sm sm:text-base font-extrabold text-gray-900">Assigned Mentee Roster</h3>
             <p className="text-xs text-gray-500 font-medium">Click any student to access academic profile & arrear timeline</p>
           </div>
 
-          <div className="relative min-w-[260px]">
+          <div className="relative w-full sm:max-w-sm">
             <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -254,8 +253,8 @@ export const MentorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto hidden md:block">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200">
                 <th className="academic-table-th">Rank</th>
@@ -275,7 +274,7 @@ export const MentorDashboard: React.FC = () => {
                   <td className="academic-table-td font-mono font-bold text-gray-700">{st.registerNo}</td>
                   <td className="academic-table-td">
                     <div className="flex items-center space-x-2.5">
-                      <img src={st.avatar} alt={st.name} className="w-8 h-8 rounded-lg object-cover border" />
+                      <img src={st.avatar} alt={st.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover border max-w-full h-auto" />
                       <span className="font-bold text-gray-900">{st.name}</span>
                     </div>
                   </td>
@@ -317,6 +316,78 @@ export const MentorDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4 p-4">
+          {filteredMentees.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 font-medium">
+              No mentee records matched your search query.
+            </div>
+          ) : (
+            filteredMentees.map((student, idx) => (
+              <div key={student.id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                <div className="flex items-center space-x-3 mb-3">
+                  <img
+                    src={student.avatar}
+                    alt={student.name}
+                    className="w-12 h-12 rounded-lg object-cover border border-gray-200 max-w-full h-auto flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-sm truncate">{student.name}</h3>
+                    <p className="text-xs text-gray-500 font-mono">{student.registerNo}</p>
+                  </div>
+                  <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 text-xs flex-shrink-0">
+                    #{student.departmentRank}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">CGPA</span>
+                    <span className={`font-black text-sm ${
+                      student.cgpa >= 8.5 ? 'text-[#4CAF50]' : student.cgpa >= 7.5 ? 'text-blue-700' : 'text-amber-700'
+                    }`}>
+                      {student.cgpa.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Attendance</span>
+                    <span className={`font-black text-sm ${
+                      student.attendancePercentage >= 85 ? 'text-[#4CAF50]' : student.attendancePercentage >= 75 ? 'text-blue-700' : 'text-[#F44336]'
+                    }`}>
+                      {student.attendancePercentage}%
+                    </span>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Arrears</span>
+                    {student.pendingArrearsCount === 0 ? (
+                      <span className="font-black text-sm text-[#4CAF50]">0 Backlogs</span>
+                    ) : (
+                      <span className="font-black text-sm text-[#F44336]">{student.pendingArrearsCount} Pending</span>
+                    )}
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Placement</span>
+                    {student.placementStatus === 'eligible_placed' && (
+                      <span className="font-black text-xs text-[#4CAF50]">Placed</span>
+                    )}
+                    {student.placementStatus === 'eligible_unplaced' && (
+                      <span className="font-black text-xs text-blue-700">Eligible</span>
+                    )}
+                    {student.placementStatus === 'ineligible_arrears' && (
+                      <span className="font-black text-xs text-[#F44336]">Ineligible</span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate(`/students/${student.id}`)}
+                  className="w-full py-2.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
+                >
+                  <EyeIcon className="w-3.5 h-3.5" /> View Profile
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

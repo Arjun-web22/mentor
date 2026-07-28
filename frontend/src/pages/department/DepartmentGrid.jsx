@@ -20,12 +20,12 @@ import {
   BriefcaseIcon,
 } from '@heroicons/react/24/outline';
 
-export const DepartmentGrid: React.FC = () => {
+export const DepartmentGrid = () => {
   const navigate = useNavigate();
   const { departments } = useDashboard();
   const [search, setSearch] = useState('');
 
-  const getDepartmentIcon = (code: string) => {
+  const getDepartmentIcon = (code) => {
     switch (code) {
       case 'CSE':
         return ComputerDesktopIcon;
@@ -56,22 +56,22 @@ export const DepartmentGrid: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Breadcrumbs */}
       <Breadcrumbs />
 
       {/* Header */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <FolderIcon className="w-7 h-7 text-[#5B82C5]" /> Academic Departments Directory
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <FolderIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#5B82C5]" /> Academic Departments Directory
           </h1>
-          <p className="text-sm font-semibold text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
             Departmental performance metrics, faculty allocation, student counts and placement statistics
           </p>
         </div>
 
-        <div className="relative min-w-[280px]">
+        <div className="relative w-full sm:max-w-sm">
           <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -84,13 +84,13 @@ export const DepartmentGrid: React.FC = () => {
       </div>
 
       {/* Grid of Department Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
         {filteredDepartments.map((dept) => {
           const IconComp = getDepartmentIcon(dept.code);
           return (
             <div
               key={dept.id}
-              className="bg-white rounded-xl p-5 border border-gray-200 shadow-xs hover:shadow-md hover:border-[#5B82C5] transition-all duration-150 flex flex-col justify-between"
+              className="bg-white rounded-xl p-5 border border-gray-200 shadow-xs hover:shadow-md hover:border-[#5B82C5] transition-all duration-150 flex flex-col justify-between cursor-pointer min-h-[44px]"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -105,7 +105,7 @@ export const DepartmentGrid: React.FC = () => {
                 <h3 className="font-extrabold text-base text-gray-900 leading-snug">{dept.name}</h3>
                 <p className="text-xs font-semibold text-gray-500 mt-1">HOD: {dept.hodName}</p>
 
-                <div className="grid grid-cols-2 gap-2 my-4 pt-3 border-t border-gray-100">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 my-4 pt-3 border-t border-gray-100">
                   <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
                     <span className="text-[11px] font-bold text-gray-400 block uppercase">Students</span>
                     <span className="text-sm font-black text-gray-900">{dept.studentsCount}</span>
@@ -130,7 +130,7 @@ export const DepartmentGrid: React.FC = () => {
 
               <button
                 onClick={() => navigate(`/departments/${dept.id}/mentors`)}
-                className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-2"
+                className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-2 min-h-[44px]"
               >
                 <span>Open Department Portal</span>
                 <ArrowRightIcon className="w-4 h-4" />

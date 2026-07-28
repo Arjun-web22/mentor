@@ -1,7 +1,5 @@
 import axios from 'axios';
 import { mockColleges, mockDepartments, mockMentors, mockStudents } from './mockData';
-import { Student, CounselingNote, Mentor, Department, College } from '../types/dashboard';
-
 // Create custom Axios Instance
 export const api = axios.create({
   baseURL: '/api',
@@ -13,18 +11,12 @@ export const api = axios.create({
 });
 
 // Memory storage for live state changes
-let studentsList: Student[] = [...mockStudents];
+let studentsList = [...mockStudents];
 
 // Mock HTTP API methods
 export const apiService = {
   // Students
-  getStudents: async (params?: {
-    search?: string;
-    departmentId?: string;
-    arrearsFilter?: string;
-    placementFilter?: string;
-    sortBy?: string;
-  }): Promise<Student[]> => {
+  getStudents: async (params) => {
     let result = [...studentsList];
 
     if (params?.departmentId && params.departmentId !== 'all') {
@@ -70,16 +62,16 @@ export const apiService = {
     return Promise.resolve(result);
   },
 
-  getStudentById: async (id: string): Promise<Student | undefined> => {
+  getStudentById: async (id) => {
     const student = studentsList.find((s) => s.id === id || s.registerNo === id);
     return Promise.resolve(student);
   },
 
   addCounselingNote: async (
-    studentId: string,
-    noteData: Omit<CounselingNote, 'id'>
-  ): Promise<CounselingNote> => {
-    const newNote: CounselingNote = {
+    studentId,
+    noteData
+  ) => {
+    const newNote = {
       ...noteData,
       id: `cn-${Date.now()}`,
     };
@@ -97,8 +89,8 @@ export const apiService = {
     return Promise.resolve(newNote);
   },
 
-  updateStudentRemarks: async (studentId: string, remarks: string): Promise<Student> => {
-    let updatedStudent!: Student;
+  updateStudentRemarks: async (studentId, remarks) => {
+    let updatedStudent;
     studentsList = studentsList.map((s) => {
       if (s.id === studentId) {
         updatedStudent = { ...s, mentorRemarks: remarks };
@@ -110,17 +102,17 @@ export const apiService = {
   },
 
   // Mentors
-  getMentors: async (): Promise<Mentor[]> => {
+  getMentors: async () => {
     return Promise.resolve(mockMentors);
   },
 
   // Departments
-  getDepartments: async (): Promise<Department[]> => {
+  getDepartments: async () => {
     return Promise.resolve(mockDepartments);
   },
 
   // Colleges
-  getColleges: async (): Promise<College[]> => {
+  getColleges: async () => {
     return Promise.resolve(mockColleges);
   },
 };

@@ -1,20 +1,6 @@
 import React from 'react';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: React.ElementType;
-  trend?: {
-    value: string;
-    isPositive?: boolean;
-    isNegative?: boolean;
-  };
-  colorScheme?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
-  onClick?: () => void;
-}
-
-export const StatCard: React.FC<StatCardProps> = ({
+export const StatCard = ({
   title,
   value,
   subtitle,
@@ -41,13 +27,13 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl p-5 border border-gray-200 shadow-xs hover:shadow-md transition-all duration-150 ${
+      className={`bg-white rounded-xl p-5 border border-gray-200 shadow-xs hover:shadow-md transition-all duration-150 min-h-[44px] flex flex-col justify-center ${
         onClick ? 'cursor-pointer hover:border-[#5B82C5]' : ''
       }`}
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</span>
-        <div className={`p-2.5 rounded-xl border ${getBadgeColors()}`}>
+        <div className={`p-2.5 rounded-xl border ${getBadgeColors()} min-h-[44px] min-w-[44px] flex items-center justify-center`}>
           <Icon className="w-5 h-5" />
         </div>
       </div>

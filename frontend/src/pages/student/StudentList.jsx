@@ -4,10 +4,9 @@ import { useDashboard } from '../../context/DashboardContext';
 import { FilterPanel } from '../../components/common/FilterPanel';
 import { DataTable } from '../../components/common/DataTable';
 import { AddCounselingModal } from '../../components/student/AddCounselingModal';
-import { Student } from '../../types/dashboard';
 import { UserGroupIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
-export const StudentList: React.FC = () => {
+export const StudentList = () => {
   const { students, departments } = useDashboard();
   const [searchParams] = useSearchParams();
 
@@ -15,7 +14,7 @@ export const StudentList: React.FC = () => {
   const [departmentId, setDepartmentId] = useState('all');
   const [arrearsFilter, setArrearsFilter] = useState('all');
   const [placementFilter, setPlacementFilter] = useState('all');
-  const [selectedStudentForCounseling, setSelectedStudentForCounseling] = useState<Student | null>(null);
+  const [selectedStudentForCounseling, setSelectedStudentForCounseling] = useState(null);
 
   // Sync query params from URL if present
   useEffect(() => {
@@ -75,21 +74,21 @@ export const StudentList: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <UserGroupIcon className="w-7 h-7 text-[#5B82C5]" /> Student Directory & Academic Records
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <UserGroupIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#5B82C5]" /> Student Directory & Academic Records
           </h1>
-          <p className="text-sm font-semibold text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
             Searchable institution-wide register with CGPA, arrears history, and mentor logs
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl border border-gray-200 transition-colors flex items-center gap-1.5"
+          className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl border border-gray-200 transition-colors flex items-center justify-center gap-1.5 min-h-[44px]"
         >
           <ArrowDownTrayIcon className="w-4 h-4 text-[#5B82C5]" /> Export Student CSV Report
         </button>

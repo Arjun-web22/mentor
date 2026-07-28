@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useDashboard } from '../context/DashboardContext';
 import { Navbar } from '../components/layout/Navbar';
@@ -17,37 +17,66 @@ import { StudentList } from '../pages/student/StudentList';
 import { StudentProfile } from '../pages/student/StudentProfile';
 import { SystemSettings } from '../pages/settings/SystemSettings';
 
-const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedLayout = ({ children }) => {
   const { isLoggedIn } = useDashboard();
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
 
   if (!isLoggedIn) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EEF3F8]">
-      <Navbar />
-      <div className="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6">
-        <Sidebar />
-        <main className="flex-1 min-w-0">{children}</main>
+    <div className="min-h-screen flex flex-col bg-[#EEF3F8] overflow-hidden">
+      <Navbar onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} isMobile={isMobile} />
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          isMobile={isMobile}
+        />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6 min-w-0">
+          <div className="w-full max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
       </div>
       <ToastContainer />
     </div>
   );
 };
 
-const DepartmentRedirect: React.FC = () => {
-  const { departmentId } = useParams<{ departmentId: string }>();
+const DepartmentRedirect = () => {
+  const { departmentId } = useParams();
   return <Navigate to={`/departments/${departmentId}/mentors`} replace />;
 };
 
-const MentorRedirect: React.FC = () => {
-  const { departmentId, mentorId } = useParams<{ departmentId: string; mentorId: string }>();
+const MentorRedirect = () => {
+  const { departmentId, mentorId } = useParams();
   return <Navigate to={`/departments/${departmentId}/mentors/${mentorId}/students`} replace />;
 };
 
-export const AppRoutes: React.FC = () => {
+export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

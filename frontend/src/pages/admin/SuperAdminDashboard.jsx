@@ -28,7 +28,7 @@ import {
   Legend,
 } from 'recharts';
 
-export const SuperAdminDashboard: React.FC = () => {
+export const SuperAdminDashboard = () => {
   const navigate = useNavigate();
   const { colleges, departments, mentors, students } = useDashboard();
 
@@ -53,29 +53,29 @@ export const SuperAdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Super Admin Executive Dashboard</h1>
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
+        <div className="w-full sm:w-auto">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-0 lg:space-x-2 space-y-2 lg:space-y-0">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight">Super Admin Executive Dashboard</h1>
             <Badge variant="primary" size="sm">AY 2025 - 2026</Badge>
           </div>
-          <p className="text-sm font-semibold text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
             Francis Xavier Group of Institutions • Central Academic ERP Portal
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto justify-start sm:justify-end">
           <button
             onClick={() => navigate('/colleges')}
-            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
+            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
           >
             <BuildingLibraryIcon className="w-4 h-4 text-[#5B82C5]" /> Manage Colleges
           </button>
           <button
             onClick={() => alert('Opening NAAC Academic Audit Export Tool...')}
-            className="px-4 py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-[#5B82C5]/20 flex items-center gap-1.5"
+            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-[#5B82C5]/20 flex items-center gap-1.5"
           >
             <DocumentChartBarIcon className="w-4 h-4" /> Export NAAC Audit Data
           </button>
@@ -83,7 +83,7 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Top 4 Key Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <StatCard
           title="Total Colleges"
           value={totalColleges}
@@ -118,23 +118,23 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Department CGPA Comparison Bar Chart */}
-        <div className="lg:col-span-2 bg-white rounded-xl p-6 border border-gray-200 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
+        <div className="lg:col-span-2 bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
             <div>
-              <h3 className="text-base font-extrabold text-gray-900">Department Average CGPA Benchmark</h3>
+              <h3 className="text-sm sm:text-base font-extrabold text-gray-900">Department Average CGPA Benchmark</h3>
               <p className="text-xs text-gray-500 font-medium">Comparison of mean academic score by department</p>
             </div>
             <Badge variant="info">Scale: 0.00 - 10.00</Badge>
           </div>
 
-          <div className="h-72">
+          <div className="h-56 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={deptCgpaData} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
+              <BarChart data={deptCgpaData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 700, fill: '#374151' }} />
-                <YAxis domain={[5, 10]} tick={{ fontSize: 12, fontWeight: 700, fill: '#374151' }} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <YAxis domain={[5, 10]} tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
@@ -143,27 +143,27 @@ export const SuperAdminDashboard: React.FC = () => {
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
                 />
-                <Bar dataKey="cgpa" fill="#5B82C5" radius={[6, 6, 0, 0]} name="Average CGPA" />
+                <Bar dataKey="cgpa" fill="#5B82C5" radius={[4, 4, 0, 0]} name="Average CGPA" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Arrear Breakdown Donut Chart */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs flex flex-col justify-between">
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900">Institutional Arrear Spectrum</h3>
+            <h3 className="text-sm sm:text-base font-extrabold text-gray-900">Institutional Arrear Spectrum</h3>
             <p className="text-xs text-gray-500 font-medium">Distribution of student backlog standing</p>
 
-            <div className="h-56 mt-4">
+            <div className="h-48 sm:h-56 mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={arrearPieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={80}
+                    innerRadius={40}
+                    outerRadius={60}
                     paddingAngle={4}
                     dataKey="value"
                   >
@@ -192,7 +192,7 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Department Performance Leaderboard Table */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-extrabold text-gray-900">Department Performance Leaderboard</h3>
@@ -206,8 +206,8 @@ export const SuperAdminDashboard: React.FC = () => {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto hidden md:block">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200">
                 <th className="academic-table-th">Dept Code</th>
@@ -252,6 +252,48 @@ export const SuperAdminDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {departments.map((dept, idx) => (
+            <div key={dept.id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30 text-sm">
+                  {dept.code}
+                </span>
+                <Badge variant={dept.pendingArrearsCount > 30 ? 'danger' : 'warning'} size="sm">
+                  {dept.pendingArrearsCount} Arrears
+                </Badge>
+              </div>
+              <h3 className="font-bold text-gray-800 text-sm mb-1">{dept.name}</h3>
+              <p className="text-xs text-gray-600 mb-3">HOD: {dept.hodName}</p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Students</span>
+                  <span className="text-sm font-black text-gray-900">{dept.studentsCount}</span>
+                </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Mentors</span>
+                  <span className="text-sm font-black text-gray-900">{dept.mentorsCount}</span>
+                </div>
+                <div className="bg-[#EBF1FA] p-2 rounded-lg">
+                  <span className="text-[10px] font-bold text-[#5B82C5] block uppercase">Avg CGPA</span>
+                  <span className="text-sm font-black text-[#5B82C5]">{dept.avgCgpa.toFixed(2)}</span>
+                </div>
+                <div className="bg-emerald-50 p-2 rounded-lg">
+                  <span className="text-[10px] font-bold text-emerald-700 block uppercase">Placement %</span>
+                  <span className="text-sm font-black text-emerald-800">{dept.placementPercentage}%</span>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/departments')}
+                className="w-full py-2.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors min-h-[44px]"
+              >
+                Open Department Portal
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

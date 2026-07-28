@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
-import { UserRole } from '../../types/dashboard';
 import { ShieldCheckIcon, AcademicCapIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outline';
 
-export const LoginPage: React.FC = () => {
+export const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useDashboard();
-  const [selectedRole, setSelectedRole] = useState<UserRole>('mentor');
+  const [selectedRole, setSelectedRole] = useState('mentor');
   const [username, setUsername] = useState('arulraj.k');
   const [password, setPassword] = useState('••••••••');
   const [rememberMe, setRememberMe] = useState(true);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     login(selectedRole);
     if (selectedRole === 'super_admin') {
@@ -24,7 +23,7 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoSelect = (role: UserRole) => {
+  const handleDemoSelect = (role) => {
     setSelectedRole(role);
     if (role === 'super_admin') {
       setUsername('principal.velmurugan');
@@ -36,9 +35,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EEF3F8] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#EEF3F8] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       {/* Institutional Top Header */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+      <div className="w-full max-w-md mx-auto text-center">
         <div className="mx-auto w-16 h-16 bg-[#5B82C5] rounded-2xl flex items-center justify-center text-white shadow-lg text-2xl font-black tracking-wider mb-4 border-2 border-white">
           FX
         </div>
@@ -54,18 +53,18 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Main Login Card */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="mt-8 w-full max-w-md mx-auto">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-200 sm:px-10">
           {/* Quick Demo Role Selector */}
           <div className="mb-6 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
             <span className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center mb-1.5">
               Select Demo Role Persona
             </span>
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
               <button
                 type="button"
                 onClick={() => handleDemoSelect('super_admin')}
-                className={`py-2 px-1 text-center text-xs font-bold rounded-lg transition-all ${
+                className={`py-2.5 px-1 text-center text-xs font-bold rounded-lg transition-all min-h-[44px] ${
                   selectedRole === 'super_admin'
                     ? 'bg-[#5B82C5] text-white shadow-xs'
                     : 'text-gray-700 hover:bg-gray-200'
@@ -76,7 +75,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleDemoSelect('hod')}
-                className={`py-2 px-1 text-center text-xs font-bold rounded-lg transition-all ${
+                className={`py-2.5 px-1 text-center text-xs font-bold rounded-lg transition-all min-h-[44px] ${
                   selectedRole === 'hod'
                     ? 'bg-[#5B82C5] text-white shadow-xs'
                     : 'text-gray-700 hover:bg-gray-200'
@@ -87,7 +86,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleDemoSelect('mentor')}
-                className={`py-2 px-1 text-center text-xs font-bold rounded-lg transition-all ${
+                className={`py-2.5 px-1 text-center text-xs font-bold rounded-lg transition-all min-h-[44px] ${
                   selectedRole === 'mentor'
                     ? 'bg-[#5B82C5] text-white shadow-xs'
                     : 'text-gray-700 hover:bg-gray-200'
@@ -153,7 +152,7 @@ export const LoginPage: React.FC = () => {
                   e.preventDefault();
                   alert('For password resets, contact FXEC IT Cell at support@francisxavier.ac.in');
                 }}
-                className="text-xs font-bold text-[#5B82C5] hover:underline"
+                className="text-xs font-bold text-[#5B82C5] hover:underline px-2 py-2 min-h-[44px] inline-block"
               >
                 Forgot Password?
               </a>

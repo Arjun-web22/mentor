@@ -1,12 +1,7 @@
 import React from 'react';
-import { ArrearItem } from '../../types/dashboard';
 import { CheckCircleIcon, ExclamationCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
 
-interface ArrearTimelineProps {
-  arrears: ArrearItem[];
-}
-
-export const ArrearTimeline: React.FC<ArrearTimelineProps> = ({ arrears }) => {
+export const ArrearTimeline = ({ arrears }) => {
   const pendingCount = arrears.filter((a) => a.status === 'pending').length;
   const clearedCount = arrears.filter((a) => a.status === 'passed_arrear' || a.status === 'passed_first_attempt').length;
 

@@ -1,21 +1,6 @@
 import React from 'react';
 import { MagnifyingGlassIcon, FunnelIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { Department } from '../../types/dashboard';
-
-interface FilterPanelProps {
-  search: string;
-  onSearchChange: (val: string) => void;
-  departmentId: string;
-  onDepartmentChange: (val: string) => void;
-  arrearsFilter: string;
-  onArrearsFilterChange: (val: string) => void;
-  placementFilter: string;
-  onPlacementFilterChange: (val: string) => void;
-  departments: Department[];
-  onReset: () => void;
-}
-
-export const FilterPanel: React.FC<FilterPanelProps> = ({
+export const FilterPanel = ({
   search,
   onSearchChange,
   departmentId,
@@ -35,13 +20,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </h4>
         <button
           onClick={onReset}
-          className="text-xs font-bold text-gray-500 hover:text-[#5B82C5] flex items-center gap-1 transition-colors"
+          className="text-xs font-bold text-gray-500 hover:text-[#5B82C5] flex items-center gap-1 transition-colors px-2 py-2 min-h-[44px]"
         >
-          <ArrowPathIcon className="w-3.5 h-3.5" /> Reset Filters
+          <ArrowPathIcon className="w-4 h-4" /> Reset Filters
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         {/* Search input */}
         <div className="relative">
           <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />

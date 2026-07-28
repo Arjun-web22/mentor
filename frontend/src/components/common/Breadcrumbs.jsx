@@ -3,19 +3,9 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
 import { ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline';
 
-interface BreadcrumbItem {
-  label: string;
-  path?: string;
-}
-
-export const Breadcrumbs: React.FC<{ items?: BreadcrumbItem[] }> = ({ items: customItems }) => {
+export const Breadcrumbs = ({ items: customItems }) => {
   const location = useLocation();
-  const params = useParams<{
-    collegeId?: string;
-    departmentId?: string;
-    mentorId?: string;
-    studentId?: string;
-  }>();
+  const params = useParams();
 
   const { colleges, departments, mentors, students } = useDashboard();
 
@@ -29,14 +19,14 @@ export const Breadcrumbs: React.FC<{ items?: BreadcrumbItem[] }> = ({ items: cus
             {item.path ? (
               <Link
                 to={item.path}
-                className="text-[#5B82C5] hover:text-[#4A6FA8] hover:underline flex items-center gap-1 transition-colors"
+                className="text-[#5B82C5] hover:text-[#4A6FA8] hover:underline flex items-center gap-1 transition-colors px-2 py-2 min-h-[44px]"
               >
-                {idx === 0 && <HomeIcon className="w-3.5 h-3.5" />}
+                {idx === 0 && <HomeIcon className="w-4 h-4" />}
                 <span>{item.label}</span>
               </Link>
             ) : (
-              <span className="text-gray-900 font-extrabold flex items-center gap-1">
-                {idx === 0 && <HomeIcon className="w-3.5 h-3.5 text-gray-500" />}
+              <span className="text-gray-900 font-extrabold flex items-center gap-1 px-2 py-2 min-h-[44px]">
+                {idx === 0 && <HomeIcon className="w-4 h-4 text-gray-500" />}
                 <span>{item.label}</span>
               </span>
             )}
@@ -48,7 +38,7 @@ export const Breadcrumbs: React.FC<{ items?: BreadcrumbItem[] }> = ({ items: cus
 
   // Auto-generate breadcrumb steps based on route params and location
   const path = location.pathname;
-  const autoItems: BreadcrumbItem[] = [
+  const autoItems = [
     { label: 'Dashboard', path: '/dashboard' },
   ];
 
@@ -101,7 +91,7 @@ export const Breadcrumbs: React.FC<{ items?: BreadcrumbItem[] }> = ({ items: cus
   }
 
   return (
-    <nav className="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-xs mb-6 text-xs font-bold text-gray-600 flex items-center flex-wrap gap-2">
+    <nav className="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-xs mb-6 text-xs font-bold text-gray-600 flex items-center flex-wrap gap-2 overflow-x-hidden">
       {autoItems.map((item, idx) => {
         const isLast = idx === autoItems.length - 1;
         return (
@@ -110,14 +100,14 @@ export const Breadcrumbs: React.FC<{ items?: BreadcrumbItem[] }> = ({ items: cus
             {!isLast && item.path ? (
               <Link
                 to={item.path}
-                className="text-[#5B82C5] hover:text-[#4A6FA8] hover:underline flex items-center gap-1 transition-colors"
+                className="text-[#5B82C5] hover:text-[#4A6FA8] hover:underline flex items-center gap-1 transition-colors px-2 py-2 min-h-[44px]"
               >
-                {idx === 0 && <HomeIcon className="w-3.5 h-3.5" />}
+                {idx === 0 && <HomeIcon className="w-4 h-4" />}
                 <span>{item.label}</span>
               </Link>
             ) : (
-              <span className="text-gray-900 font-extrabold flex items-center gap-1">
-                {idx === 0 && <HomeIcon className="w-3.5 h-3.5 text-gray-500" />}
+              <span className="text-gray-900 font-extrabold flex items-center gap-1 px-2 py-2 min-h-[44px]">
+                {idx === 0 && <HomeIcon className="w-4 h-4 text-gray-500" />}
                 <span>{item.label}</span>
               </span>
             )}

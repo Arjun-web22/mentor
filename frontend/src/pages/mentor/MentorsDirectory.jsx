@@ -15,8 +15,8 @@ import {
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
-export const MentorsDirectory: React.FC = () => {
-  const { departmentId } = useParams<{ departmentId: string }>();
+export const MentorsDirectory = () => {
+  const { departmentId } = useParams();
   const navigate = useNavigate();
   const { departments, mentors, students } = useDashboard();
   const [search, setSearch] = useState('');
@@ -50,27 +50,27 @@ export const MentorsDirectory: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Breadcrumb Navigation */}
       <Breadcrumbs />
 
       {/* Header */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-0 lg:space-x-2 space-y-2 lg:space-y-0">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight">
               {department.name} Department
             </h1>
             <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-[#EBF1FA] text-[#5B82C5] border border-[#5B82C5]/30">
               {department.code}
             </span>
           </div>
-          <p className="text-sm font-semibold text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
             Mentors responsible for student mentoring in this department.
           </p>
         </div>
 
-        <div className="relative min-w-[280px]">
+        <div className="relative w-full sm:max-w-sm">
           <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -92,7 +92,7 @@ export const MentorsDirectory: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredMentors.map((mentor) => {
             // Compute real-time mentee stats from students data if available
             const mentees = students.filter((s) => s.mentorId === mentor.id);
@@ -113,7 +113,7 @@ export const MentorsDirectory: React.FC = () => {
             return (
               <div
                 key={mentor.id}
-                className="bg-white rounded-xl p-5 border border-gray-200 shadow-xs hover:shadow-md hover:border-[#5B82C5] transition-all duration-150 flex flex-col justify-between"
+                className="bg-white rounded-xl p-5 border border-gray-200 shadow-xs hover:shadow-md hover:border-[#5B82C5] transition-all duration-150 flex flex-col justify-between cursor-pointer min-h-[44px]"
               >
                 <div>
                   {/* Top Row: Photo, Name, Code, Status */}
@@ -122,7 +122,7 @@ export const MentorsDirectory: React.FC = () => {
                       <img
                         src={mentor.avatar}
                         alt={mentor.name}
-                        className="w-14 h-14 rounded-xl object-cover border-2 border-[#5B82C5]/30 shadow-xs"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border-2 border-[#5B82C5]/30 shadow-xs max-w-full h-auto"
                       />
                       <div>
                         <div className="flex items-center space-x-2">
@@ -155,7 +155,7 @@ export const MentorsDirectory: React.FC = () => {
                   </div>
 
                   {/* Statistics Grid */}
-                  <div className="grid grid-cols-2 gap-2.5 my-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 my-4">
                     <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
                       <span className="text-[10px] font-bold text-gray-400 block uppercase">Assigned Mentees</span>
                       <span className="text-sm font-black text-gray-900 flex items-center gap-1 mt-0.5">
@@ -200,7 +200,7 @@ export const MentorsDirectory: React.FC = () => {
                   onClick={() =>
                     navigate(`/departments/${department.id}/mentors/${mentor.id}/students`)
                   }
-                  className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-3"
+                  className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-3 min-h-[44px]"
                 >
                   <span>View Mentees</span>
                   <ArrowRightIcon className="w-4 h-4" />

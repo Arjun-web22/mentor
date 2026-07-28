@@ -1,73 +1,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserRole, UserProfile, Student, Department, Mentor, College, NotificationItem } from '../types/dashboard';
 import { mockUserProfiles } from '../services/mockData';
 import { apiService } from '../services/api';
 
-export type FontScale = 'normal' | 'large' | 'xlarge';
+const DashboardContext = createContext(undefined);
 
-interface ToastMessage {
-  id: string;
-  type: 'success' | 'danger' | 'info' | 'warning';
-  title: string;
-  message: string;
-}
+export const DashboardProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(mockUserProfiles.mentor_arulraj);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [fontScale, setFontScale] = useState('normal');
 
-interface DashboardContextType {
-  // Role & Auth State
-  currentUser: UserProfile;
-  setRole: (role: UserRole) => void;
-  isLoggedIn: boolean;
-  login: (role: UserRole) => void;
-  logout: () => void;
+  const [students, setStudents] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [mentors, setMentors] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [toasts, setToasts] = useState([]);
 
-  // Accessibility Font Scaling
-  fontScale: FontScale;
-  setFontScale: (scale: FontScale) => void;
-
-  // Data Collections
-  students: Student[];
-  departments: Department[];
-  mentors: Mentor[];
-  colleges: College[];
-  loading: boolean;
-  refreshData: () => Promise<void>;
-
-  // Student Actions
-  getStudent: (id: string) => Promise<Student | undefined>;
-  addCounselingNote: (
-    studentId: string,
-    category: 'Academic' | 'Attendance' | 'Personal' | 'Placement' | 'General',
-    note: string,
-    actionPlan: string,
-    followUpDate: string
-  ) => Promise<void>;
-
-  // Notifications
-  notifications: NotificationItem[];
-  unreadNotificationCount: number;
-  markNotificationAsRead: (id: string) => void;
-
-  // Toast System
-  toasts: ToastMessage[];
-  addToast: (type: 'success' | 'danger' | 'info' | 'warning', title: string, message: string) => void;
-  removeToast: (id: string) => void;
-}
-
-const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
-
-export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile>(mockUserProfiles.mentor_arulraj);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-  const [fontScale, setFontScale] = useState<FontScale>('normal');
-
-  const [students, setStudents] = useState<Student[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [mentors, setMentors] = useState<Mentor[]>([]);
-  const [colleges, setColleges] = useState<College[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
+  const [notifications, setNotifications] = useState([
     {
       id: 'n-1',
       studentId: 'stu-1002',
@@ -124,7 +73,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     loadAllData();
   }, []);
 
-  const setRole = (role: UserRole) => {
+  const setRole = (role) => {
     if (role === 'super_admin') {
       setCurrentUser(mockUserProfiles.super_admin);
       addToast('info', 'Switched Role', 'Viewing as Super Admin (Principal)');
@@ -137,7 +86,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const login = (role: UserRole) => {
+  const login = (role) => {
     setRole(role);
     setIsLoggedIn(true);
   };
@@ -147,7 +96,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     addToast('info', 'Logged Out', 'Successfully logged out of FXEC ERP');
   };
 
-  const addToast = (type: 'success' | 'danger' | 'info' | 'warning', title: string, message: string) => {
+  const addToast = (type, title, message) => {
     const id = `toast-${Date.now()}`;
     setToasts((prev) => [...prev, { id, type, title, message }]);
     setTimeout(() => {
@@ -155,20 +104,20 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, 4000);
   };
 
-  const removeToast = (id: string) => {
+  const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const getStudent = async (id: string) => {
+  const getStudent = async (id) => {
     return apiService.getStudentById(id);
   };
 
   const addCounselingNote = async (
-    studentId: string,
-    category: 'Academic' | 'Attendance' | 'Personal' | 'Placement' | 'General',
-    note: string,
-    actionPlan: string,
-    followUpDate: string
+    studentId,
+    category,
+    note,
+    actionPlan,
+    followUpDate
   ) => {
     const student = students.find((s) => s.id === studentId);
     if (!student) return;
@@ -189,7 +138,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     addToast('success', 'Counseling Record Saved', `Added counseling session for ${student.name}`);
   };
 
-  const markNotificationAsRead = (id: string) => {
+  const markNotificationAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );

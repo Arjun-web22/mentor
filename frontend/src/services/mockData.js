@@ -1,6 +1,4 @@
-import { College, Department, Mentor, Student, CounselingNote, UserProfile } from '../types/dashboard';
-
-export const mockColleges: College[] = [
+export const mockColleges = [
   {
     id: 'col-1',
     code: 'FXEC',
@@ -29,7 +27,7 @@ export const mockColleges: College[] = [
   },
 ];
 
-export const mockDepartments: Department[] = [
+export const mockDepartments = [
   {
     id: 'dept-cse',
     code: 'CSE',
@@ -144,7 +142,7 @@ export const mockDepartments: Department[] = [
   },
 ];
 
-export const mockMentors: Mentor[] = [
+export const mockMentors = [
   {
     id: 'men-101',
     employeeCode: 'EMP-CSE-01',
@@ -327,7 +325,7 @@ export const mockMentors: Mentor[] = [
   },
 ];
 
-export const mockStudents: Student[] = [
+export const mockStudents = [
   {
     id: 'stu-1001',
     registerNo: '960721104001',
@@ -461,7 +459,7 @@ export const mockStudents: Student[] = [
         studentId: 'stu-1001',
         studentName: 'A. Karthi Krishna',
         type: 'placement_ready',
-        message: 'Successfully placed at Zoho Corporation with 8.5 LPA CTC package!',
+        message: 'Successfully placed at Zoho Corporation with 8.5 LPA CTC package',
         date: '2026-06-20',
         read: true,
         severity: 'success',
@@ -1094,7 +1092,7 @@ export const mockStudents: Student[] = [
   },
 ];
 
-export const mockUserProfiles: Record<string, UserProfile> = {
+export const mockUserProfiles = {
   super_admin: {
     id: 'user-admin',
     name: 'Dr. V. Velmurugan',
