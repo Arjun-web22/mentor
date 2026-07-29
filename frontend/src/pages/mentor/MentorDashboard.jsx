@@ -4,6 +4,7 @@ import { useDashboard } from '../../context/DashboardContext';
 import { StatCard } from '../../components/common/StatCard';
 import { Badge } from '../../components/common/Badge';
 import { AddCounselingModal } from '../../components/student/AddCounselingModal';
+import { getStudentsByMentor } from '../../services/mentorService';
 import {
   EyeIcon,
   AcademicCapIcon,
@@ -34,19 +35,20 @@ export const MentorDashboard = () => {
   const { students, currentUser } = useDashboard();
   const [selectedStudentForCounseling, setSelectedStudentForCounseling] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [studentsData, setStudentsData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Mentee list assigned to Dr. K. Arulraj
-  const menteeStudents = students.filter(
-    (s) => s.mentorId === 'men-101' || s.departmentId === 'dept-cse'
-  );
+  const menteeStudents = (studentsData && !studentsData.message) ? studentsData : [];
 
   const assignedCount = menteeStudents.length;
   const highPerformers = menteeStudents.filter((s) => s.cgpa >= 8.5).length;
   const arrearWatchlist = menteeStudents.filter((s) => s.pendingArrearsCount > 0).length;
   const placementReady = menteeStudents.filter((s) => s.cgpa >= 7.5 && s.pendingArrearsCount === 0).length;
-  const avgAttendance = (
-    menteeStudents.reduce((acc, s) => acc + s.attendancePercentage, 0) / (assignedCount || 1)
-  ).toFixed(1);
+  const avgAttendance = assignedCount > 0 
+    ? (menteeStudents.reduce((acc, s) => acc + (s.attendancePercentage || 0), 0) / assignedCount).toFixed(1)
+    : '0.0';
 
   // Filtered mentee list for search
   const filteredMentees = menteeStudents.filter(
@@ -57,22 +59,59 @@ export const MentorDashboard = () => {
 
   // Chart data
   const cgpaDistData = [
-    { range: '9.0 - 10.0', count: menteeStudents.filter((s) => s.cgpa >= 9.0).length || 2, fill: '#4CAF50' },
-    { range: '8.0 - 8.9', count: menteeStudents.filter((s) => s.cgpa >= 8.0 && s.cgpa < 9.0).length || 3, fill: '#5B82C5' },
-    { range: '7.0 - 7.9', count: menteeStudents.filter((s) => s.cgpa >= 7.0 && s.cgpa < 8.0).length || 1, fill: '#3B82F6' },
-    { range: 'Below 7.0', count: menteeStudents.filter((s) => s.cgpa < 7.0).length || 1, fill: '#FF9800' },
+    { range: '9.0 - 10.0', count: menteeStudents.filter((s) => s.cgpa >= 9.0).length || 0, fill: '#4CAF50' },
+    { range: '8.0 - 8.9', count: menteeStudents.filter((s) => s.cgpa >= 8.0 && s.cgpa < 9.0).length || 0, fill: '#5B82C5' },
+    { range: '7.0 - 7.9', count: menteeStudents.filter((s) => s.cgpa >= 7.0 && s.cgpa < 8.0).length || 0, fill: '#3B82F6' },
+    { range: 'Below 7.0', count: menteeStudents.filter((s) => s.cgpa < 7.0).length || 0, fill: '#FF9800' },
   ];
 
   const arrearPieData = [
-    { name: '0 Arrears (Clear)', value: menteeStudents.filter((s) => s.pendingArrearsCount === 0).length || 5, color: '#4CAF50' },
-    { name: '1 Pending Arrear', value: menteeStudents.filter((s) => s.pendingArrearsCount === 1).length || 1, color: '#FF9800' },
-    { name: '2+ Pending Arrears', value: menteeStudents.filter((s) => s.pendingArrearsCount >= 2).length || 1, color: '#F44336' },
+    { name: '0 Arrears (Clear)', value: menteeStudents.filter((s) => s.pendingArrearsCount === 0).length || 0, color: '#4CAF50' },
+    { name: '1 Pending Arrear', value: menteeStudents.filter((s) => s.pendingArrearsCount === 1).length || 0, color: '#FF9800' },
+    { name: '2+ Pending Arrears', value: menteeStudents.filter((s) => s.pendingArrearsCount >= 2).length || 0, color: '#F44336' },
   ];
 
   return (
     <div className="space-y-6 overflow-x-hidden">
-      {/* Header Profile Summary */}
-      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#5B82C5] border-t-transparent"></div>
+            <p className="mt-4 text-sm font-semibold text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <p className="text-sm font-semibold text-red-800 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-colors min-h-[44px]"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Placeholder State */}
+      {!loading && !error && studentsData && studentsData.message && (
+        <div className="bg-white p-12 text-center rounded-xl border border-gray-200 shadow-xs">
+          <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+          <h3 className="text-base font-extrabold text-gray-900">No student data available yet.</h3>
+          <p className="text-xs text-gray-500 mt-1">
+            Student data will be added to the system soon.
+          </p>
+        </div>
+      )}
+
+      {/* Dashboard Content */}
+      {!loading && !error && (!studentsData || !studentsData.message) && (
+        <>
+          {/* Header Profile Summary */}
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex flex-col lg:flex-row items-center lg:items-start space-x-0 lg:space-x-4 gap-4 w-full sm:w-auto">
             <img
@@ -399,6 +438,8 @@ export const MentorDashboard = () => {
           studentId={selectedStudentForCounseling.id}
           studentName={selectedStudentForCounseling.name}
         />
+      )}
+        </>
       )}
     </div>
   );

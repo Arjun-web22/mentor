@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDashboard } from '../../context/DashboardContext';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { Badge } from '../../components/common/Badge';
+import { getStudentsByMentor } from '../../services/mentorService';
 import {
   UserGroupIcon,
   MagnifyingGlassIcon,
@@ -18,103 +18,30 @@ import {
 export const MentorStudentsDirectory = () => {
   const { departmentId, mentorId } = useParams();
   const navigate = useNavigate();
-  const { mentors, students, departments } = useDashboard();
+  const [studentsData, setStudentsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Find mentor & department
-  const mentor = mentors.find((m) => m.id === mentorId) || {
-    id: mentorId || 'men-102',
-    name: 'Dr. A. Anand',
-    employeeCode: 'EMP-IT-01',
-    title: 'Professor & Head',
-    departmentId: departmentId || 'dept-it',
-    departmentName: 'Information Technology',
-  };
+  useEffect(() => {
+    const fetchStudentsData = async () => {
+      try {
+        setLoading(true);
+        const data = await getStudentsByMentor(mentorId);
+        setStudentsData(data);
+        setError(null);
+      } catch (err) {
+        setError('Unable to connect to server.');
+        console.error('Error fetching students:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const department = departments.find((d) => d.id === (departmentId || mentor.departmentId)) || {
-    id: 'dept-it',
-    name: 'Information Technology',
-    code: 'IT',
-  };
+    fetchStudentsData();
+  }, [mentorId]);
 
-  // State for search and filters
-  const [search, setSearch] = useState('');
-  const [yearFilter, setYearFilter] = useState('all');
-  const [sectionFilter, setSectionFilter] = useState('all');
-  const [placementFilter, setPlacementFilter] = useState('all');
-  const [arrearsFilter, setArrearsFilter] = useState('all');
-  const [cgpaFilter, setCgpaFilter] = useState('all');
-
-  // Table pagination & sorting
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('departmentRank');
-  const [sortOrder, setSortOrder] = useState('asc');
-
-  // Filter students assigned to this mentor
-  // If no students assigned specifically to mentorId in mock, fallback to department students
-  const mentorAssignedStudents = students.filter(
-    (s) => s.mentorId === mentor.id || (s.departmentId === department.id && (!mentorId || mentorId === 'all'))
-  );
-
-  const finalStudentsList = mentorAssignedStudents.length > 0
-    ? mentorAssignedStudents
-    : students.filter((s) => s.departmentId === department.id);
-
-  // Apply filters
-  const filteredStudents = finalStudentsList.filter((s) => {
-    const matchesSearch =
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.registerNo.toLowerCase().includes(search.toLowerCase()) ||
-      s.email.toLowerCase().includes(search.toLowerCase());
-
-    const matchesYear = yearFilter === 'all' || s.year === Number(yearFilter);
-    const matchesSection = sectionFilter === 'all' || s.section === sectionFilter;
-    const matchesPlacement = placementFilter === 'all' || s.placementStatus === placementFilter;
-
-    let matchesArrears = true;
-    if (arrearsFilter === 'zero') matchesArrears = s.pendingArrearsCount === 0;
-    else if (arrearsFilter === 'pending') matchesArrears = s.pendingArrearsCount > 0;
-    else if (arrearsFilter === 'cleared') matchesArrears = s.totalHistoryArrearsCount > 0 && s.pendingArrearsCount === 0;
-
-    let matchesCgpa = true;
-    if (cgpaFilter === '9_plus') matchesCgpa = s.cgpa >= 9.0;
-    else if (cgpaFilter === '8_to_9') matchesCgpa = s.cgpa >= 8.0 && s.cgpa < 9.0;
-    else if (cgpaFilter === '7_to_8') matchesCgpa = s.cgpa >= 7.0 && s.cgpa < 8.0;
-    else if (cgpaFilter === 'below_7') matchesCgpa = s.cgpa < 7.0;
-
-    return matchesSearch && matchesYear && matchesSection && matchesPlacement && matchesArrears && matchesCgpa;
-  });
-
-  // Sorting
-  const sortedStudents = [...filteredStudents].sort((a, b) => {
-    let aVal = a[sortField];
-    let bVal = b[sortField];
-    if (sortOrder === 'asc') return aVal > bVal ? 1 : -1;
-    return aVal < bVal ? 1 : -1;
-  });
-
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
-
-  const handleResetFilters = () => {
-    setSearch('');
-    setYearFilter('all');
-    setSectionFilter('all');
-    setPlacementFilter('all');
-    setArrearsFilter('all');
-    setCgpaFilter('all');
-  };
-
-  // Pagination calculations
-  const totalPages = Math.max(1, Math.ceil(sortedStudents.length / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedStudents = sortedStudents.slice(startIndex, startIndex + pageSize);
+  // Handle placeholder response
+  const isPlaceholder = studentsData && studentsData.message === 'Students not yet added.';
 
   return (
     <div className="space-y-6 overflow-x-hidden">
@@ -124,413 +51,48 @@ export const MentorStudentsDirectory = () => {
       {/* Header */}
       <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="w-full sm:w-auto">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-0 lg:space-x-3 gap-2 lg:gap-0">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-              <UserGroupIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#5B82C5]" /> Students Assigned to {mentor.name}
-            </h1>
-          </div>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <UserGroupIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#5B82C5]" /> Students Directory
+          </h1>
           <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
-            Faculty Mentor: <strong className="text-gray-800">{mentor.name}</strong> • {department.name} ({mentor.employeeCode})
+            Students assigned to this mentor
           </p>
         </div>
-
-        <div className="flex items-center space-x-2 w-full sm:w-auto justify-center sm:justify-start">
-          <span className="px-3.5 py-1.5 bg-[#EBF1FA] text-[#5B82C5] border border-[#5B82C5]/30 rounded-xl text-xs font-black">
-            Total Mentees: {finalStudentsList.length}
-          </span>
-        </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-xs space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
-          <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
-            <FunnelIcon className="w-4 h-4 text-[#5B82C5]" /> Student Directory Filters
-          </h3>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#5B82C5] border-t-transparent"></div>
+            <p className="mt-4 text-sm font-semibold text-gray-600">Loading Students...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <p className="text-sm font-semibold text-red-800 mb-4">{error}</p>
           <button
-            onClick={handleResetFilters}
-            className="text-xs font-bold text-gray-500 hover:text-[#5B82C5] flex items-center gap-1 transition-colors px-2 py-2 min-h-[44px]"
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-colors min-h-[44px]"
           >
-            <ArrowPathIcon className="w-4 h-4" /> Reset Filters
+            Retry
           </button>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-          {/* Search */}
-          <div className="relative col-span-1 sm:col-span-2">
-            <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by name or register no..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-            />
-          </div>
-
-          {/* Filter Year */}
-          <div>
-            <select
-              value={yearFilter}
-              onChange={(e) => setYearFilter(e.target.value)}
-              className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-            >
-              <option value="all">All Years</option>
-              <option value="1">1st Year</option>
-              <option value="2">2nd Year</option>
-              <option value="3">3rd Year</option>
-              <option value="4">4th Year</option>
-            </select>
-          </div>
-
-          {/* Filter Section */}
-          <div>
-            <select
-              value={sectionFilter}
-              onChange={(e) => setSectionFilter(e.target.value)}
-              className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-            >
-              <option value="all">All Sections</option>
-              <option value="A">Section A</option>
-              <option value="B">Section B</option>
-              <option value="C">Section C</option>
-            </select>
-          </div>
-
-          {/* Filter Placement Eligible */}
-          <div>
-            <select
-              value={placementFilter}
-              onChange={(e) => setPlacementFilter(e.target.value)}
-              className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-            >
-              <option value="all">All Placement Status</option>
-              <option value="eligible_placed">Eligible - Placed</option>
-              <option value="eligible_unplaced">Eligible - Unplaced</option>
-              <option value="ineligible_arrears">Ineligible (Arrears)</option>
-              <option value="opted_higher_studies">Higher Studies</option>
-            </select>
-          </div>
-
-          {/* Filter Arrears */}
-          <div>
-            <select
-              value={arrearsFilter}
-              onChange={(e) => setArrearsFilter(e.target.value)}
-              className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-            >
-              <option value="all">All Arrear Status</option>
-              <option value="zero">Zero Backlogs</option>
-              <option value="pending">Pending Arrears</option>
-              <option value="cleared">Cleared History</option>
-            </select>
-          </div>
-
-          {/* Filter CGPA Range */}
-          <div>
-            <select
-              value={cgpaFilter}
-              onChange={(e) => setCgpaFilter(e.target.value)}
-              className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-            >
-              <option value="all">All CGPA Ranges</option>
-              <option value="9_plus">9.00 - 10.00 CGPA</option>
-              <option value="8_to_9">8.00 - 8.99 CGPA</option>
-              <option value="7_to_8">7.00 - 7.99 CGPA</option>
-              <option value="below_7">&lt; 7.00 CGPA</option>
-            </select>
-          </div>
+      {/* Placeholder State */}
+      {!loading && !error && isPlaceholder && (
+        <div className="bg-white p-12 text-center rounded-xl border border-gray-200 shadow-xs">
+          <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+          <h3 className="text-base font-extrabold text-gray-900">No student data available yet.</h3>
+          <p className="text-xs text-gray-500 mt-1">
+            Student data will be added to the system soon.
+          </p>
         </div>
-      </div>
-
-      {/* Professional Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto hidden md:block">
-          <table className="w-full text-left border-collapse min-w-[1200px]">
-            <thead>
-              <tr className="bg-gray-100 border-b border-gray-200">
-                <th
-                  onClick={() => handleSort('departmentRank')}
-                  className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Rank</span>
-                    <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                  </div>
-                </th>
-                <th className="academic-table-th">Register Number</th>
-                <th className="academic-table-th">Photo</th>
-                <th className="academic-table-th">Student Name</th>
-                <th className="academic-table-th">Year</th>
-                <th className="academic-table-th">Section</th>
-                <th
-                  onClick={() => handleSort('cgpa')}
-                  className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>CGPA</span>
-                    <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                  </div>
-                </th>
-                <th
-                  onClick={() => handleSort('pendingArrearsCount')}
-                  className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Current Arrears</span>
-                    <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                  </div>
-                </th>
-                <th className="academic-table-th">History Arrears</th>
-                <th
-                  onClick={() => handleSort('attendancePercentage')}
-                  className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Attendance %</span>
-                    <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                  </div>
-                </th>
-                <th className="academic-table-th">Placement Status</th>
-                <th className="academic-table-th">Dept Rank</th>
-                <th className="academic-table-th">College Rank</th>
-                <th className="academic-table-th text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {paginatedStudents.length === 0 ? (
-                <tr>
-                  <td colSpan={14} className="px-4 py-8 text-center text-gray-500 font-medium">
-                    No assigned student records matched the active filter criteria.
-                  </td>
-                </tr>
-              ) : (
-                paginatedStudents.map((student, idx) => (
-                  <tr
-                    key={student.id}
-                    className={`hover:bg-[#EBF1FA]/40 transition-colors ${
-                      idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'
-                    }`}
-                  >
-                    <td className="academic-table-td">
-                      <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 text-xs">
-                        #{student.classRank}
-                      </span>
-                    </td>
-                    <td className="academic-table-td font-mono font-bold text-gray-700 text-xs">
-                      {student.registerNo}
-                    </td>
-                    <td className="academic-table-td">
-                      <img
-                        src={student.avatar}
-                        alt={student.name}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover border border-gray-200 max-w-full h-auto"
-                      />
-                    </td>
-                    <td className="academic-table-td">
-                      <div>
-                        <span className="font-bold text-gray-900 block leading-tight">{student.name}</span>
-                        <span className="text-[11px] text-gray-500 font-medium">{student.email}</span>
-                      </div>
-                    </td>
-                    <td className="academic-table-td font-bold text-gray-800 text-xs">Year {student.year}</td>
-                    <td className="academic-table-td font-bold text-gray-800 text-xs">Sec {student.section}</td>
-                    <td className="academic-table-td">
-                      <span
-                        className={`font-black text-xs px-2.5 py-1 rounded-lg border ${
-                          student.cgpa >= 8.5
-                            ? 'bg-emerald-50 text-[#4CAF50] border-emerald-200'
-                            : student.cgpa >= 7.5
-                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                            : 'bg-amber-50 text-amber-700 border-amber-200'
-                        }`}
-                      >
-                        {student.cgpa.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="academic-table-td">
-                      {student.pendingArrearsCount === 0 ? (
-                        <Badge variant="success" size="sm">0 Backlogs</Badge>
-                      ) : (
-                        <Badge variant="danger" size="sm">
-                          {student.pendingArrearsCount} Pending
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="academic-table-td text-xs text-gray-600 font-semibold">
-                      {student.totalHistoryArrearsCount} Total
-                    </td>
-                    <td className="academic-table-td">
-                      <span
-                        className={`font-extrabold text-xs px-2.5 py-1 rounded-lg border ${
-                          student.attendancePercentage >= 85
-                            ? 'bg-emerald-50 text-[#4CAF50] border-emerald-200'
-                            : student.attendancePercentage >= 75
-                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                            : 'bg-red-50 text-[#F44336] border-red-200'
-                        }`}
-                      >
-                        {student.attendancePercentage}%
-                      </span>
-                    </td>
-                    <td className="academic-table-td">
-                      {student.placementStatus === 'eligible_placed' && (
-                        <Badge variant="success" size="sm">
-                          Placed ({student.companyName})
-                        </Badge>
-                      )}
-                      {student.placementStatus === 'eligible_unplaced' && (
-                        <Badge variant="info" size="sm">Eligible</Badge>
-                      )}
-                      {student.placementStatus === 'ineligible_arrears' && (
-                        <Badge variant="danger" size="sm">Ineligible</Badge>
-                      )}
-                      {student.placementStatus === 'opted_higher_studies' && (
-                        <Badge variant="warning" size="sm">Higher Studies</Badge>
-                      )}
-                    </td>
-                    <td className="academic-table-td font-extrabold text-gray-800 text-xs">#{student.departmentRank}</td>
-                    <td className="academic-table-td font-extrabold text-gray-800 text-xs">#{student.collegeRank}</td>
-                    <td className="academic-table-td text-right">
-                      <button
-                        onClick={() => navigate(`/students/${student.id}`)}
-                        className="px-3 py-1.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs min-h-[44px]"
-                      >
-                        <EyeIcon className="w-3.5 h-3.5" /> View Profile
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Card View */}
-        <div className="md:hidden space-y-4 p-4">
-          {paginatedStudents.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 font-medium">
-              No assigned student records matched the active filter criteria.
-            </div>
-          ) : (
-            paginatedStudents.map((student, idx) => (
-              <div key={student.id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
-                <div className="flex items-center space-x-3 mb-3">
-                  <img
-                    src={student.avatar}
-                    alt={student.name}
-                    className="w-12 h-12 rounded-lg object-cover border border-gray-200 max-w-full h-auto flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">{student.name}</h3>
-                    <p className="text-xs text-gray-500 font-mono">{student.registerNo}</p>
-                    <p className="text-[11px] text-gray-400">{student.email}</p>
-                  </div>
-                  <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 text-xs flex-shrink-0">
-                    #{student.classRank}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <div className="bg-gray-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold text-gray-400 block uppercase">CGPA</span>
-                    <span className={`font-black text-sm ${
-                      student.cgpa >= 8.5 ? 'text-[#4CAF50]' : student.cgpa >= 7.5 ? 'text-blue-700' : 'text-amber-700'
-                    }`}>
-                      {student.cgpa.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="bg-gray-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Attendance</span>
-                    <span className={`font-black text-sm ${
-                      student.attendancePercentage >= 85 ? 'text-[#4CAF50]' : student.attendancePercentage >= 75 ? 'text-blue-700' : 'text-[#F44336]'
-                    }`}>
-                      {student.attendancePercentage}%
-                    </span>
-                  </div>
-                  <div className="bg-gray-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Arrears</span>
-                    {student.pendingArrearsCount === 0 ? (
-                      <span className="font-black text-sm text-[#4CAF50]">0 Backlogs</span>
-                    ) : (
-                      <span className="font-black text-sm text-[#F44336]">{student.pendingArrearsCount} Pending</span>
-                    )}
-                  </div>
-                  <div className="bg-gray-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Year/Sec</span>
-                    <span className="font-black text-sm text-gray-900">Y{student.year} S{student.section}</span>
-                  </div>
-                </div>
-                <div className="mb-3">
-                  {student.placementStatus === 'eligible_placed' && (
-                    <Badge variant="success" size="sm">Placed ({student.companyName})</Badge>
-                  )}
-                  {student.placementStatus === 'eligible_unplaced' && (
-                    <Badge variant="info" size="sm">Eligible</Badge>
-                  )}
-                  {student.placementStatus === 'ineligible_arrears' && (
-                    <Badge variant="danger" size="sm">Ineligible</Badge>
-                  )}
-                  {student.placementStatus === 'opted_higher_studies' && (
-                    <Badge variant="warning" size="sm">Higher Studies</Badge>
-                  )}
-                </div>
-                <button
-                  onClick={() => navigate(`/students/${student.id}`)}
-                  className="w-full py-2.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
-                >
-                  <EyeIcon className="w-3.5 h-3.5" /> View Profile
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Pagination Footer */}
-        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-gray-600">
-          <div>
-            Showing {sortedStudents.length === 0 ? 0 : startIndex + 1} to{' '}
-            {Math.min(startIndex + pageSize, sortedStudents.length)} of {sortedStudents.length} Students
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1.5">
-              <span>Rows per page:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="bg-white border border-gray-300 rounded-lg px-2 py-1 font-bold text-gray-800 focus:outline-none"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-              </select>
-            </div>
-
-            <div className="flex items-center space-x-1">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-40 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <ChevronLeftIcon className="w-4 h-4" />
-              </button>
-              <span className="px-2 font-bold text-gray-800">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-40 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <ChevronRightIcon className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

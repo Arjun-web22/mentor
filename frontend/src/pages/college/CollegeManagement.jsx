@@ -19,7 +19,7 @@ export const CollegeManagement = () => {
   const [regionFilter, setRegionFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredColleges = colleges.filter((col) => {
+  const filteredColleges = (colleges || []).filter((col) => {
     const matchesSearch =
       col.name.toLowerCase().includes(search.toLowerCase()) ||
       col.code.toLowerCase().includes(search.toLowerCase()) ||

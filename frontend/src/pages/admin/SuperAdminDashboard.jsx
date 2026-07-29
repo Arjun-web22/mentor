@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
 import { StatCard } from '../../components/common/StatCard';
 import { Badge } from '../../components/common/Badge';
+import { getDepartments } from '../../services/departmentService';
 import {
   BuildingLibraryIcon,
   FolderIcon,
@@ -30,19 +31,40 @@ import {
 
 export const SuperAdminDashboard = () => {
   const navigate = useNavigate();
-  const { colleges, departments, mentors, students } = useDashboard();
+  const { colleges, departments: contextDepartments, mentors, students } = useDashboard();
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDepartmentsData = async () => {
+      try {
+        setLoading(true);
+        const data = await getDepartments();
+        setDepartments(data);
+        setError(null);
+      } catch (err) {
+        setError('Unable to load dashboard data.');
+        console.error('Error fetching departments:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDepartmentsData();
+  }, []);
 
   // Compute aggregate metrics
-  const totalColleges = colleges.length;
+  const totalColleges = (colleges || []).length;
   const totalDepartments = departments.length;
-  const totalMentors = mentors.reduce((acc, m) => acc + m.assignedStudentCount, 142);
+  const totalMentors = (mentors || []).reduce((acc, m) => acc + (m.assignedStudentCount || 0), 142);
   const totalStudents = 2850;
 
   // Data for Department CGPA Bar Chart
   const deptCgpaData = departments.map((d) => ({
-    name: d.code,
-    cgpa: d.avgCgpa,
-    placement: d.placementPercentage,
+    name: d.department_id,
+    cgpa: 8.0, // Placeholder - will be calculated from real student data
+    placement: 85, // Placeholder - will be calculated from real student data
   }));
 
   // Data for Arrear Distribution Pie Chart
@@ -54,8 +76,34 @@ export const SuperAdminDashboard = () => {
 
   return (
     <div className="space-y-6 overflow-x-hidden">
-      {/* Page Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#5B82C5] border-t-transparent"></div>
+            <p className="mt-4 text-sm font-semibold text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <p className="text-sm font-semibold text-red-800 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-colors min-h-[44px]"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Dashboard Content */}
+      {!loading && !error && (
+        <>
+          {/* Page Header */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
         <div className="w-full sm:w-auto">
           <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-0 lg:space-x-2 space-y-2 lg:space-y-0">
             <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 tracking-tight">Super Admin Executive Dashboard</h1>
@@ -223,26 +271,26 @@ export const SuperAdminDashboard = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {departments.map((dept, idx) => (
-                <tr key={dept.id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
-                  <td className="academic-table-td font-extrabold text-gray-900">{dept.code}</td>
-                  <td className="academic-table-td font-bold text-gray-800">{dept.name}</td>
-                  <td className="academic-table-td text-gray-700">{dept.hodName}</td>
-                  <td className="academic-table-td font-bold">{dept.studentsCount}</td>
-                  <td className="academic-table-td font-semibold">{dept.mentorsCount}</td>
+                <tr key={dept.department_id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
+                  <td className="academic-table-td font-extrabold text-gray-900">{dept.department_id}</td>
+                  <td className="academic-table-td font-bold text-gray-800">{dept.department_name}</td>
+                  <td className="academic-table-td text-gray-700">-</td>
+                  <td className="academic-table-td font-bold">-</td>
+                  <td className="academic-table-td font-semibold">-</td>
                   <td className="academic-table-td">
                     <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30">
-                      {dept.avgCgpa.toFixed(2)}
+                      -
                     </span>
                   </td>
-                  <td className="academic-table-td font-bold text-emerald-700">{dept.placementPercentage}%</td>
+                  <td className="academic-table-td font-bold text-emerald-700">-</td>
                   <td className="academic-table-td">
-                    <Badge variant={dept.pendingArrearsCount > 30 ? 'danger' : 'warning'} size="sm">
-                      {dept.pendingArrearsCount} Arrears
+                    <Badge variant="info" size="sm">
+                      N/A
                     </Badge>
                   </td>
                   <td className="academic-table-td text-right">
                     <button
-                      onClick={() => navigate('/departments')}
+                      onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
                       className="px-3 py-1.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors"
                     >
                       Open Portal
@@ -257,37 +305,37 @@ export const SuperAdminDashboard = () => {
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
           {departments.map((dept, idx) => (
-            <div key={dept.id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+            <div key={dept.department_id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
               <div className="flex items-center justify-between mb-3">
                 <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30 text-sm">
-                  {dept.code}
+                  {dept.department_id}
                 </span>
-                <Badge variant={dept.pendingArrearsCount > 30 ? 'danger' : 'warning'} size="sm">
-                  {dept.pendingArrearsCount} Arrears
+                <Badge variant="info" size="sm">
+                  N/A
                 </Badge>
               </div>
-              <h3 className="font-bold text-gray-800 text-sm mb-1">{dept.name}</h3>
-              <p className="text-xs text-gray-600 mb-3">HOD: {dept.hodName}</p>
+              <h3 className="font-bold text-gray-800 text-sm mb-1">{dept.department_name}</h3>
+              <p className="text-xs text-gray-600 mb-3">HOD: -</p>
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <div className="bg-gray-50 p-2 rounded-lg">
                   <span className="text-[10px] font-bold text-gray-400 block uppercase">Students</span>
-                  <span className="text-sm font-black text-gray-900">{dept.studentsCount}</span>
+                  <span className="text-sm font-black text-gray-900">-</span>
                 </div>
                 <div className="bg-gray-50 p-2 rounded-lg">
                   <span className="text-[10px] font-bold text-gray-400 block uppercase">Mentors</span>
-                  <span className="text-sm font-black text-gray-900">{dept.mentorsCount}</span>
+                  <span className="text-sm font-black text-gray-900">-</span>
                 </div>
                 <div className="bg-[#EBF1FA] p-2 rounded-lg">
                   <span className="text-[10px] font-bold text-[#5B82C5] block uppercase">Avg CGPA</span>
-                  <span className="text-sm font-black text-[#5B82C5]">{dept.avgCgpa.toFixed(2)}</span>
+                  <span className="text-sm font-black text-[#5B82C5]">-</span>
                 </div>
                 <div className="bg-emerald-50 p-2 rounded-lg">
                   <span className="text-[10px] font-bold text-emerald-700 block uppercase">Placement %</span>
-                  <span className="text-sm font-black text-emerald-800">{dept.placementPercentage}%</span>
+                  <span className="text-sm font-black text-emerald-800">-</span>
                 </div>
               </div>
               <button
-                onClick={() => navigate('/departments')}
+                onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
                 className="w-full py-2.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors min-h-[44px]"
               >
                 Open Department Portal
@@ -296,6 +344,8 @@ export const SuperAdminDashboard = () => {
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

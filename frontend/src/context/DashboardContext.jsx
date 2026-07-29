@@ -1,20 +1,42 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockUserProfiles } from '../services/mockData';
-import { apiService } from '../services/api';
+import React, { createContext, useContext, useState } from 'react';
 
 const DashboardContext = createContext(undefined);
 
+const userProfiles = {
+  super_admin: {
+    id: 'user-1',
+    name: 'Dr. S. Raja',
+    role: 'super_admin',
+    email: 'principal@francisxavier.ac.in',
+    avatar: 'https://ui-avatars.com/api/?name=Dr+S+Raja&background=5B82C5&color=fff',
+  },
+  hod: {
+    id: 'user-2',
+    name: 'Dr. K. Suresh',
+    role: 'hod',
+    email: 'hod.cse@francisxavier.ac.in',
+    avatar: 'https://ui-avatars.com/api/?name=Dr+K+Suresh&background=5B82C5&color=fff',
+  },
+  mentor: {
+    id: 'user-3',
+    name: 'Dr. K. Arulraj',
+    role: 'mentor',
+    email: 'arulraj@francisxavier.ac.in',
+    avatar: 'https://ui-avatars.com/api/?name=Dr+K+Arulraj&background=5B82C5&color=fff',
+  },
+};
+
 export const DashboardProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(mockUserProfiles.mentor_arulraj);
+  const [currentUser, setCurrentUser] = useState(userProfiles.mentor);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [fontScale, setFontScale] = useState('normal');
-
-  const [students, setStudents] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [mentors, setMentors] = useState([]);
-  const [colleges, setColleges] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
+  
+  // Initialize collections as empty arrays for backward compatibility
+  const [students] = useState([]);
+  const [departments] = useState([]);
+  const [mentors] = useState([]);
+  const [colleges] = useState([]);
 
   const [notifications, setNotifications] = useState([
     {
@@ -49,39 +71,15 @@ export const DashboardProvider = ({ children }) => {
     },
   ]);
 
-  const loadAllData = async () => {
-    setLoading(true);
-    try {
-      const [stus, depts, mens, cols] = await Promise.all([
-        apiService.getStudents(),
-        apiService.getDepartments(),
-        apiService.getMentors(),
-        apiService.getColleges(),
-      ]);
-      setStudents(stus);
-      setDepartments(depts);
-      setMentors(mens);
-      setColleges(cols);
-    } catch (err) {
-      console.error('Failed to load portal data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAllData();
-  }, []);
-
   const setRole = (role) => {
     if (role === 'super_admin') {
-      setCurrentUser(mockUserProfiles.super_admin);
+      setCurrentUser(userProfiles.super_admin);
       addToast('info', 'Switched Role', 'Viewing as Super Admin (Principal)');
     } else if (role === 'hod') {
-      setCurrentUser(mockUserProfiles.hod_cse);
+      setCurrentUser(userProfiles.hod);
       addToast('info', 'Switched Role', 'Viewing as Head of Department (CSE)');
     } else {
-      setCurrentUser(mockUserProfiles.mentor_arulraj);
+      setCurrentUser(userProfiles.mentor);
       addToast('info', 'Switched Role', 'Viewing as Faculty Mentor (Dr. K. Arulraj)');
     }
   };
@@ -108,36 +106,6 @@ export const DashboardProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const getStudent = async (id) => {
-    return apiService.getStudentById(id);
-  };
-
-  const addCounselingNote = async (
-    studentId,
-    category,
-    note,
-    actionPlan,
-    followUpDate
-  ) => {
-    const student = students.find((s) => s.id === studentId);
-    if (!student) return;
-
-    await apiService.addCounselingNote(studentId, {
-      studentId,
-      studentName: student.name,
-      mentorId: currentUser.mentorId || 'men-101',
-      mentorName: currentUser.name,
-      date: new Date().toISOString().split('T')[0],
-      category,
-      note,
-      actionPlan,
-      followUpDate,
-    });
-
-    await loadAllData();
-    addToast('success', 'Counseling Record Saved', `Added counseling session for ${student.name}`);
-  };
-
   const markNotificationAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
@@ -160,10 +128,6 @@ export const DashboardProvider = ({ children }) => {
         departments,
         mentors,
         colleges,
-        loading,
-        refreshData: loadAllData,
-        getStudent,
-        addCounselingNote,
         notifications,
         unreadNotificationCount,
         markNotificationAsRead,
