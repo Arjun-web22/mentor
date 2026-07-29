@@ -5,8 +5,10 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 // Import routes
+const authRoutes = require('./routes/authRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
+const studentRoutes = require('./routes/studentRoutes');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -21,8 +23,10 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/mentors', mentorRoutes);
+app.use('/api', studentRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -152,7 +152,7 @@ export const MentorsDirectory = () => {
               {/* View Mentees Button */}
               <button
                 onClick={() =>
-                  navigate(`/departments/${departmentId}/mentors/${mentor.user_id}/students`)
+                  navigate(`/departments/${departmentId}/mentors/${mentor.staff_id}/students`)
                 }
                 className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-3 min-h-[44px]"
               >

@@ -1,4 +1,5 @@
 const { fetchMentor, fetchStudentsByMentor } = require('../models/mentorModel');
+const { getStudentsByStaffId } = require('../models/studentModel');
 
 /**
  * Get mentor by ID
@@ -30,21 +31,25 @@ const getMentorById = async (req, res) => {
 };
 
 /**
- * Get students by mentor ID (placeholder)
+ * Get students by mentor ID
  * @route GET /api/mentors/:mentorId/students
  */
 const getStudentsByMentor = async (req, res) => {
   try {
     const { mentorId } = req.params;
+    console.log("getStudentsByMentor called with mentorId:", mentorId);
     
-    // Placeholder - will be implemented when students table is added
-    const result = await fetchStudentsByMentor(mentorId);
+    // Use the real student model to fetch by staff_id
+    const students = await getStudentsByStaffId(mentorId);
+    console.log("Students found:", students.length);
     
     res.status(200).json({
       success: true,
-      data: result
+      count: students.length,
+      data: students
     });
   } catch (error) {
+    console.error('Error in getStudentsByMentor:', error);
     res.status(500).json({
       success: false,
       message: error.message

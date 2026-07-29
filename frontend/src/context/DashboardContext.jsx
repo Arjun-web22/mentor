@@ -1,34 +1,12 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useAuth } from './AuthContext';
 
 const DashboardContext = createContext(undefined);
 
-const userProfiles = {
-  super_admin: {
-    id: 'user-1',
-    name: 'Dr. S. Raja',
-    role: 'super_admin',
-    email: 'principal@francisxavier.ac.in',
-    avatar: 'https://ui-avatars.com/api/?name=Dr+S+Raja&background=5B82C5&color=fff',
-  },
-  hod: {
-    id: 'user-2',
-    name: 'Dr. K. Suresh',
-    role: 'hod',
-    email: 'hod.cse@francisxavier.ac.in',
-    avatar: 'https://ui-avatars.com/api/?name=Dr+K+Suresh&background=5B82C5&color=fff',
-  },
-  mentor: {
-    id: 'user-3',
-    name: 'Dr. K. Arulraj',
-    role: 'mentor',
-    email: 'arulraj@francisxavier.ac.in',
-    avatar: 'https://ui-avatars.com/api/?name=Dr+K+Arulraj&background=5B82C5&color=fff',
-  },
-};
 
 export const DashboardProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(userProfiles.mentor);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user: authUser, getUserAvatar } = useAuth();
+  
   const [fontScale, setFontScale] = useState('normal');
   const [toasts, setToasts] = useState([]);
   
@@ -71,26 +49,23 @@ export const DashboardProvider = ({ children }) => {
     },
   ]);
 
-  const setRole = (role) => {
-    if (role === 'super_admin') {
-      setCurrentUser(userProfiles.super_admin);
-      addToast('info', 'Switched Role', 'Viewing as Super Admin (Principal)');
-    } else if (role === 'hod') {
-      setCurrentUser(userProfiles.hod);
-      addToast('info', 'Switched Role', 'Viewing as Head of Department (CSE)');
-    } else {
-      setCurrentUser(userProfiles.mentor);
-      addToast('info', 'Switched Role', 'Viewing as Faculty Mentor (Dr. K. Arulraj)');
-    }
-  };
+  // Map authenticated user to currentUser format
+  const currentUser = authUser ? {
+    id: authUser.user_id,
+    name: authUser.full_name,
+    role: authUser.role?.toLowerCase() || 'mentor',
+    email: authUser.email,
+    avatar: getUserAvatar(),
+    designation: authUser.designation,
+    department_id: authUser.department_id,
+    college_id: authUser.college_id,
+  } : null;
 
-  const login = (role) => {
-    setRole(role);
-    setIsLoggedIn(true);
-  };
+  const isLoggedIn = !!authUser;
 
   const logout = () => {
-    setIsLoggedIn(false);
+    // AuthContext handles the actual logout
+    // This is just for dashboard-specific cleanup if needed
     addToast('info', 'Logged Out', 'Successfully logged out of FXEC ERP');
   };
 
@@ -118,9 +93,7 @@ export const DashboardProvider = ({ children }) => {
     <DashboardContext.Provider
       value={{
         currentUser,
-        setRole,
         isLoggedIn,
-        login,
         logout,
         fontScale,
         setFontScale,

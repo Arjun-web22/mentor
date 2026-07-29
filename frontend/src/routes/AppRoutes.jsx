@@ -4,6 +4,7 @@ import { useDashboard } from '../context/DashboardContext';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { ToastContainer } from '../components/common/ToastContainer';
+import { ProtectedRoute } from '../components/common/ProtectedRoute';
 
 // Pages
 import { LoginPage } from '../pages/auth/LoginPage';
@@ -12,6 +13,7 @@ import { CollegeManagement } from '../pages/college/CollegeManagement';
 import { DepartmentGrid } from '../pages/department/DepartmentGrid';
 import { MentorsDirectory } from '../pages/mentor/MentorsDirectory';
 import { MentorStudentsDirectory } from '../pages/student/MentorStudentsDirectory';
+import { StudentDetails } from '../pages/student/StudentDetails';
 import { MentorDashboard } from '../pages/mentor/MentorDashboard';
 import { StudentList } from '../pages/student/StudentList';
 import { StudentProfile } from '../pages/student/StudentProfile';
@@ -85,113 +87,151 @@ export const AppRoutes = () => {
       <Route
         path="/dashboard"
         element={
-          <ProtectedLayout>
-            <SuperAdminDashboard />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+            <ProtectedLayout>
+              <SuperAdminDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/admin"
         element={
-          <ProtectedLayout>
-            <SuperAdminDashboard />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+            <ProtectedLayout>
+              <SuperAdminDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/colleges"
         element={
-          <ProtectedLayout>
-            <CollegeManagement />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN']}>
+            <ProtectedLayout>
+              <CollegeManagement />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/colleges/:collegeId"
         element={
-          <ProtectedLayout>
-            <CollegeManagement />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN']}>
+            <ProtectedLayout>
+              <CollegeManagement />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/departments"
         element={
-          <ProtectedLayout>
-            <DepartmentGrid />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <DepartmentGrid />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/departments/:departmentId"
         element={
-          <ProtectedLayout>
-            <DepartmentRedirect />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <DepartmentRedirect />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/departments/:departmentId/mentors"
         element={
-          <ProtectedLayout>
-            <MentorsDirectory />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <MentorsDirectory />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/departments/:departmentId/mentors/:mentorId"
         element={
-          <ProtectedLayout>
-            <MentorRedirect />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <MentorRedirect />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/departments/:departmentId/mentors/:mentorId/students"
         element={
-          <ProtectedLayout>
-            <MentorStudentsDirectory />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <MentorStudentsDirectory />
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/students/:registerNo"
+        element={
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <StudentDetails />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/mentor"
         element={
-          <ProtectedLayout>
-            <MentorDashboard />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['MENTOR']}>
+            <ProtectedLayout>
+              <MentorDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/students"
         element={
-          <ProtectedLayout>
-            <StudentList />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <StudentList />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/students/:id"
         element={
-          <ProtectedLayout>
-            <StudentProfile />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <StudentProfile />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/analytics"
         element={
-          <ProtectedLayout>
-            <SuperAdminDashboard />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+            <ProtectedLayout>
+              <SuperAdminDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/settings"
         element={
-          <ProtectedLayout>
-            <SystemSettings />
-          </ProtectedLayout>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <SystemSettings />
+            </ProtectedLayout>
+          </ProtectedRoute>
         }
       />
 

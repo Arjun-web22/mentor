@@ -1,36 +1,161 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDashboard } from '../../context/DashboardContext';
+import { useAuth } from '../../context/AuthContext';
 import { ShieldCheckIcon, AcademicCapIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outline';
+import { login as loginApi, googleLogin as googleLoginApi } from '../../services/authService';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useDashboard();
+  const { login } = useAuth();
+  const googleButtonRef = useRef(null);
   const [selectedRole, setSelectedRole] = useState('mentor');
-  const [username, setUsername] = useState('arulraj.k');
-  const [password, setPassword] = useState('••••••••');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [googleScriptLoaded, setGoogleScriptLoaded] = useState(false);
+  const [googleScriptError, setGoogleScriptError] = useState(false);
 
-  const handleLoginSubmit = (e) => {
+  // Load Google Identity Services script
+  useEffect(() => {
+    const loadGoogleScript = () => {
+      if (window.google) {
+        setGoogleScriptLoaded(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        setGoogleScriptLoaded(true);
+      };
+      script.onerror = () => {
+        setGoogleScriptError(true);
+        console.error('Failed to load Google Identity Services script');
+      };
+      document.head.appendChild(script);
+    };
+
+    loadGoogleScript();
+  }, []);
+
+  // Initialize Google Sign-In after script loads
+  useEffect(() => {
+    if (googleScriptLoaded && window.google && !googleScriptError) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+        });
+
+        // Render the Google Sign-In button
+        if (googleButtonRef.current) {
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+          });
+        }
+      } catch (err) {
+        console.error('Error initializing Google Sign-In:', err);
+        setGoogleScriptError(true);
+      }
+    }
+  }, [googleScriptLoaded, googleScriptError]);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const apiResponse = await googleLoginApi(response.credential);
+
+      if (apiResponse.success) {
+        login(apiResponse.token, apiResponse.user);
+
+        const userRole = apiResponse.user.role;
+        if (userRole === 'SUPER_ADMIN') {
+          navigate('/admin');
+        } else if (userRole === 'COLLEGE_ADMIN') {
+          navigate('/college');
+        } else if (userRole === 'HOD') {
+          navigate('/departments');
+        } else if (userRole === 'MENTOR') {
+          navigate('/mentor');
+        } else {
+          navigate('/departments');
+        }
+      } else {
+        setError(apiResponse.message || 'Google login failed');
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Unable to authenticate with Google. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    login(selectedRole);
-    if (selectedRole === 'super_admin') {
-      navigate('/admin');
-    } else if (selectedRole === 'hod') {
-      navigate('/departments');
-    } else {
-      navigate('/mentor');
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await loginApi(username, password);
+
+      if (response.success) {
+        // Store token and user in AuthContext
+        login(response.token, response.user);
+
+        // Navigate based on user role from backend (not frontend selection)
+        const userRole = response.user.role;
+        
+        if (userRole === 'SUPER_ADMIN') {
+          navigate('/admin');
+        } else if (userRole === 'COLLEGE_ADMIN') {
+          navigate('/college');
+        } else if (userRole === 'HOD') {
+          navigate('/departments');
+        } else if (userRole === 'MENTOR') {
+          navigate('/mentor');
+        } else {
+          navigate('/departments'); // Default fallback
+        }
+      } else {
+        setError(response.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Unable to connect to server. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDemoSelect = (role) => {
     setSelectedRole(role);
     if (role === 'super_admin') {
-      setUsername('principal.velmurugan');
+      setUsername('admin@fxec.edu.in');
     } else if (role === 'hod') {
-      setUsername('hod.manohar');
+      setUsername('hod@fxec.edu.in');
     } else {
-      setUsername('arulraj.k');
+      setUsername('mentor@fxec.edu.in');
     }
   };
 
@@ -97,6 +222,22 @@ export const LoginPage = () => {
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4">
+              <p className="text-xs font-semibold text-red-800 text-center">{error}</p>
+            </div>
+          )}
+
+          {/* Google Script Error */}
+          {googleScriptError && (
+            <div className="mb-5 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+              <p className="text-xs font-semibold text-yellow-800 text-center">
+                Google Sign-In failed to load. Please use email/password login or refresh the page.
+              </p>
+            </div>
+          )}
+
           <form className="space-y-5" onSubmit={handleLoginSubmit}>
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
@@ -161,10 +302,47 @@ export const LoginPage = () => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-black text-white bg-[#5B82C5] hover:bg-[#4A6FA8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5B82C5] transition-all"
+                disabled={isLoading}
+                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-black text-white bg-[#5B82C5] hover:bg-[#4A6FA8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5B82C5] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign In to Academic ERP Portal
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing In...
+                  </span>
+                ) : (
+                  'Sign In to Academic ERP Portal'
+                )}
               </button>
+            </div>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-xs font-bold">
+                <span className="px-2 bg-white text-gray-500">OR</span>
+              </div>
+            </div>
+
+            {/* Google Sign-In Button */}
+            <div className="flex justify-center">
+              {googleScriptLoaded ? (
+                <div ref={googleButtonRef} className="w-full"></div>
+              ) : googleScriptError ? (
+                <div className="w-full text-center text-xs font-semibold text-gray-500 py-3">
+                  Google Sign-In unavailable
+                </div>
+              ) : (
+                <div className="w-full flex justify-center items-center py-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-gray-600"></div>
+                  <span className="ml-2 text-xs font-semibold text-gray-600">Loading Google Sign-In...</span>
+                </div>
+              )}
             </div>
           </form>
 

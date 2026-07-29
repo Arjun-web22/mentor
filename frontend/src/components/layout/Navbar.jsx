@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   BellIcon,
   MagnifyingGlassIcon,
@@ -17,9 +18,9 @@ import {
 export const Navbar = ({ onMenuToggle, isMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout: authLogout } = useAuth();
   const {
     currentUser,
-    setRole,
     logout,
     fontScale,
     setFontScale,
@@ -40,16 +41,11 @@ export const Navbar = ({ onMenuToggle, isMobile }) => {
     }
   };
 
-  const handleRoleChange = (role) => {
-    setRole(role);
+  const handleLogout = () => {
+    authLogout();
+    logout();
     setShowRoleMenu(false);
-    if (role === 'super_admin') {
-      navigate('/admin');
-    } else if (role === 'hod') {
-      navigate('/departments');
-    } else {
-      navigate('/mentor');
-    }
+    navigate('/login');
   };
 
   return (
@@ -221,49 +217,17 @@ export const Navbar = ({ onMenuToggle, isMobile }) => {
               {showRoleMenu && (
                 <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 p-1 sm:p-1.5">
                   <div className="px-2 sm:px-3 py-1.5 sm:py-2 border-b border-gray-100 mb-1">
-                    <p className="text-[10px] sm:text-xs text-gray-400 font-semibold uppercase">Switch User View</p>
+                    <p className="text-[10px] sm:text-xs text-gray-400 font-semibold uppercase">User Profile</p>
                   </div>
-                  <button
-                    onClick={() => handleRoleChange('super_admin')}
-                    className={`w-full text-left px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[10px] sm:text-xs font-bold flex items-center justify-between min-h-[40px] sm:min-h-[44px] ${
-                      currentUser.role === 'super_admin'
-                        ? 'bg-[#EBF1FA] text-[#5B82C5]'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="truncate">1. Super Admin (Principal)</span>
-                    {currentUser.role === 'super_admin' && <CheckCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5B82C5] flex-shrink-0" />}
-                  </button>
-                  <button
-                    onClick={() => handleRoleChange('hod')}
-                    className={`w-full text-left px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[10px] sm:text-xs font-bold flex items-center justify-between min-h-[40px] sm:min-h-[44px] ${
-                      currentUser.role === 'hod'
-                        ? 'bg-[#EBF1FA] text-[#5B82C5]'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="truncate">2. HOD Dashboard (CSE)</span>
-                    {currentUser.role === 'hod' && <CheckCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5B82C5] flex-shrink-0" />}
-                  </button>
-                  <button
-                    onClick={() => handleRoleChange('mentor')}
-                    className={`w-full text-left px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[10px] sm:text-xs font-bold flex items-center justify-between min-h-[40px] sm:min-h-[44px] ${
-                      currentUser.role === 'mentor'
-                        ? 'bg-[#EBF1FA] text-[#5B82C5]'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="truncate">3. Mentor View (Dr. Arulraj)</span>
-                    {currentUser.role === 'mentor' && <CheckCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5B82C5] flex-shrink-0" />}
-                  </button>
+                  <div className="px-2 sm:px-3 py-2 sm:py-2.5">
+                    <p className="text-[10px] sm:text-xs font-bold text-gray-900">{currentUser.name}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-600">{currentUser.designation || 'Faculty'}</p>
+                    <p className="text-[10px] sm:text-xs text-[#5B82C5] font-semibold capitalize">{currentUser.role.replace('_', ' ')}</p>
+                  </div>
 
                   <div className="border-t border-gray-100 my-1"></div>
                   <button
-                    onClick={() => {
-                      logout();
-                      setShowRoleMenu(false);
-                      navigate('/login');
-                    }}
+                    onClick={handleLogout}
                     className="w-full text-left px-2 sm:px-3 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold text-[#F44336] hover:bg-red-50 rounded-lg flex items-center space-x-1.5 sm:space-x-2 min-h-[40px] sm:min-h-[44px]"
                   >
                     <ArrowRightOnRectangleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
