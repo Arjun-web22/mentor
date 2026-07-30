@@ -14,8 +14,27 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('departmentRank');
+  const [sortField, setSortField] = useState('student_name');
   const [sortOrder, setSortOrder] = useState('asc');
+
+  // Generate initials-based avatar from name
+  const getStudentAvatar = (name) => {
+    if (!name) return null;
+    const initials = name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+    
+    const colors = ['#5B82C5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+    const colorIndex = name.charCodeAt(0) % colors.length;
+    
+    return {
+      initials,
+      backgroundColor: colors[colorIndex]
+    };
+  };
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -41,110 +60,63 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
   const paginatedStudents = sortedStudents.slice(startIndex, startIndex + pageSize);
 
   // Mobile Card View Component
-  const StudentCard = ({ student, idx }) => (
-    <div
-      className={`bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3 ${
-        idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'
-      }`}
-    >
-      {/* Student Header */}
-      <div className="flex items-center space-x-3">
-        <img
-          src={student.avatar}
-          alt={student.name}
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover border border-gray-200 max-w-full h-auto"
-        />
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-gray-900 text-sm truncate">{student.name}</h3>
-          <p className="text-xs text-gray-500 font-mono">{student.registerNo}</p>
-          <p className="text-[11px] text-gray-500 font-medium">
-            {student.departmentName.split(' ')[0]} • Sem {student.semester}-{student.section}
-          </p>
-        </div>
-        <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 text-xs flex-shrink-0">
-          #{student.departmentRank}
-        </span>
-      </div>
-
-      {/* Academic Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
-        <div className="bg-gray-50 p-2 rounded-lg">
-          <span className="text-[10px] font-bold text-gray-400 block uppercase">CGPA</span>
-          <span
-            className={`font-black text-sm ${
-              student.cgpa >= 8.5
-                ? 'text-[#4CAF50]'
-                : student.cgpa >= 7.5
-                ? 'text-blue-700'
-                : 'text-amber-700'
-            }`}
-          >
-            {student.cgpa.toFixed(2)}
-          </span>
-        </div>
-        <div className="bg-gray-50 p-2 rounded-lg">
-          <span className="text-[10px] font-bold text-gray-400 block uppercase">Attendance</span>
-          <span
-            className={`font-black text-sm ${
-              student.attendancePercentage >= 85
-                ? 'text-[#4CAF50]'
-                : student.attendancePercentage >= 75
-                ? 'text-blue-700'
-                : 'text-[#F44336]'
-            }`}
-          >
-            {student.attendancePercentage}%
-          </span>
-        </div>
-        <div className="bg-gray-50 p-2 rounded-lg">
-          <span className="text-[10px] font-bold text-gray-400 block uppercase">Arrears</span>
-          {student.pendingArrearsCount === 0 ? (
-            <span className="font-black text-sm text-[#4CAF50]">0 Backlogs</span>
+  const StudentCard = ({ student, idx }) => {
+    const avatar = getStudentAvatar(student.student_name);
+    return (
+      <div
+        className={`bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3 ${
+          idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'
+        }`}
+      >
+        {/* Student Header */}
+        <div className="flex items-center space-x-3">
+          {avatar ? (
+            <div
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-sm font-black text-gray-800 border border-gray-200"
+              style={{ backgroundColor: avatar.backgroundColor }}
+            >
+              {avatar.initials}
+            </div>
           ) : (
-            <span className="font-black text-sm text-[#F44336]">{student.pendingArrearsCount} Pending</span>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gray-200 flex items-center justify-center border border-gray-200">
+              <UserIcon className="w-6 h-6 text-gray-500" />
+            </div>
           )}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-gray-900 text-sm truncate">{student.student_name}</h3>
+            <p className="text-xs text-gray-500 font-mono">{student.register_no}</p>
+            <p className="text-[11px] text-gray-500 font-medium">
+              {student.course_degree} • Year {student.year}-{student.section}
+            </p>
+          </div>
         </div>
-        <div className="bg-gray-50 p-2 rounded-lg">
-          <span className="text-[10px] font-bold text-gray-400 block uppercase">Placement</span>
-          {student.placementStatus === 'eligible_placed' && (
-            <span className="font-black text-xs text-[#4CAF50]">Placed</span>
-          )}
-          {student.placementStatus === 'eligible_unplaced' && (
-            <span className="font-black text-xs text-blue-700">Eligible</span>
-          )}
-          {student.placementStatus === 'ineligible_arrears' && (
-            <span className="font-black text-xs text-[#F44336]">Ineligible</span>
-          )}
-        </div>
-      </div>
 
-      {/* Mentor Remarks */}
-      {student.mentorRemarks && (
+        {/* Mentor Info */}
         <div className="bg-gray-50 p-2 rounded-lg">
-          <span className="text-[10px] font-bold text-gray-400 block uppercase">Mentor Remarks</span>
-          <p className="text-xs text-gray-600 font-medium truncate">{student.mentorRemarks}</p>
+          <span className="text-[10px] font-bold text-gray-400 block uppercase">Mentor</span>
+          <p className="text-xs text-gray-600 font-medium truncate">{student.staff_name}</p>
         </div>
-      )}
 
-      {/* Actions */}
-      <div className="flex items-center space-x-2 pt-2">
-        <button
-          onClick={() => navigate(`/students/${student.id}`)}
-          className="flex-1 px-3 py-2 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
-        >
-          <EyeIcon className="w-4 h-4" /> View Profile
-        </button>
-        {onOpenCounselingModal && (
+        {/* Actions */}
+        <div className="flex items-center space-x-2 pt-2">
           <button
-            onClick={() => onOpenCounselingModal(student)}
-            className="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-xs rounded-xl transition-all min-h-[44px]"
+            onClick={() => navigate(`/students/${student.register_no}`)}
+            className="flex-1 px-3 py-2 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
           >
-            Counsel
+            <EyeIcon className="w-4 h-4" /> View Profile
           </button>
-        )}
+          {onOpenCounselingModal && (
+            <button
+              onClick={() => onOpenCounselingModal(student)}
+              className="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-xs rounded-xl transition-all min-h-[44px]"
+            >
+              Counsel
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
@@ -154,46 +126,20 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
           <thead>
             <tr className="bg-gray-100/90 border-b border-gray-200">
               <th
-                onClick={() => handleSort('departmentRank')}
+                onClick={() => handleSort('student_name')}
                 className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center space-x-1">
-                  <span>Dept Rank</span>
+                  <span>Student Name</span>
                   <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
                 </div>
               </th>
               <th className="academic-table-th">Register No</th>
-              <th className="academic-table-th">Student Name</th>
-              <th
-                onClick={() => handleSort('cgpa')}
-                className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>CGPA</span>
-                  <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                </div>
-              </th>
-              <th
-                onClick={() => handleSort('pendingArrearsCount')}
-                className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Current Arrears</span>
-                  <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                </div>
-              </th>
-              <th className="academic-table-th">Arrear History</th>
-              <th
-                onClick={() => handleSort('attendancePercentage')}
-                className="academic-table-th cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Attendance %</span>
-                  <ArrowsUpDownIcon className="w-3.5 h-3.5 text-gray-500" />
-                </div>
-              </th>
-              <th className="academic-table-th">Placement Status</th>
-              <th className="academic-table-th">Mentor Remarks</th>
+              <th className="academic-table-th">Roll No</th>
+              <th className="academic-table-th">Course</th>
+              <th className="academic-table-th">Year</th>
+              <th className="academic-table-th">Section</th>
+              <th className="academic-table-th">Mentor</th>
               <th className="academic-table-th text-right">Actions</th>
             </tr>
           </thead>
@@ -205,110 +151,71 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
                 </td>
               </tr>
             ) : (
-              paginatedStudents.map((student, idx) => (
-                <tr
-                  key={student.id}
-                  className={`hover:bg-[#EBF1FA]/40 transition-colors ${
-                    idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'
-                  }`}
-                >
-                  <td className="academic-table-td">
-                    <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 text-xs">
-                      #{student.departmentRank}
-                    </span>
-                  </td>
-                  <td className="academic-table-td font-mono font-bold text-gray-700 text-xs">
-                    {student.registerNo}
-                  </td>
-                  <td className="academic-table-td">
-                    <div className="flex items-center space-x-2.5">
-                      <img
-                        src={student.avatar}
-                        alt={student.name}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover border border-gray-200 max-w-full h-auto"
-                      />
-                      <div>
-                        <span className="font-bold text-gray-900 block leading-tight">{student.name}</span>
-                        <span className="text-[11px] text-gray-500 font-medium">
-                          {student.departmentName.split(' ')[0]} • Sem {student.semester}-{student.section}
-                        </span>
+              paginatedStudents.map((student, idx) => {
+                const avatar = getStudentAvatar(student.student_name);
+                return (
+                  <tr
+                    key={student.register_no}
+                    className={`hover:bg-[#EBF1FA]/40 transition-colors ${
+                      idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'
+                    }`}
+                  >
+                    <td className="academic-table-td">
+                      <div className="flex items-center space-x-2.5">
+                        {avatar ? (
+                          <div
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs font-black text-gray-800 border border-gray-200"
+                            style={{ backgroundColor: avatar.backgroundColor }}
+                          >
+                            {avatar.initials}
+                          </div>
+                        ) : (
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gray-200 flex items-center justify-center border border-gray-200">
+                            <UserIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                        )}
+                        <span className="font-bold text-gray-900 block leading-tight">{student.student_name}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="academic-table-td">
-                    <span
-                      className={`font-black text-sm px-2.5 py-1 rounded-lg border ${
-                        student.cgpa >= 8.5
-                          ? 'bg-emerald-50 text-[#4CAF50] border-emerald-200'
-                          : student.cgpa >= 7.5
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
-                          : 'bg-amber-50 text-amber-700 border-amber-200'
-                      }`}
-                    >
-                      {student.cgpa.toFixed(2)}
-                    </span>
-                  </td>
-                  <td className="academic-table-td">
-                    {student.pendingArrearsCount === 0 ? (
-                      <Badge variant="success" size="sm">0 Backlogs</Badge>
-                    ) : (
-                      <Badge variant="danger" size="sm">
-                        {student.pendingArrearsCount} Pending
-                      </Badge>
-                    )}
-                  </td>
-                  <td className="academic-table-td text-xs text-gray-600 font-semibold">
-                    {student.totalHistoryArrearsCount} Total ({student.totalHistoryArrearsCount - student.pendingArrearsCount} Cleared)
-                  </td>
-                  <td className="academic-table-td">
-                    <span
-                      className={`font-extrabold text-xs px-2.5 py-1 rounded-lg border ${
-                        student.attendancePercentage >= 85
-                          ? 'bg-emerald-50 text-[#4CAF50] border-emerald-200'
-                          : student.attendancePercentage >= 75
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
-                          : 'bg-red-50 text-[#F44336] border-red-200'
-                      }`}
-                    >
-                      {student.attendancePercentage}%
-                    </span>
-                  </td>
-                  <td className="academic-table-td">
-                    {student.placementStatus === 'eligible_placed' && (
-                      <Badge variant="success" size="sm">
-                        Placed: {student.companyName} ({student.packageCtc})
-                      </Badge>
-                    )}
-                    {student.placementStatus === 'eligible_unplaced' && (
-                      <Badge variant="info" size="sm">Eligible for Drives</Badge>
-                    )}
-                    {student.placementStatus === 'ineligible_arrears' && (
-                      <Badge variant="danger" size="sm">Ineligible (Arrears)</Badge>
-                    )}
-                  </td>
-                  <td className="academic-table-td max-w-xs truncate text-xs text-gray-600 font-medium">
-                    {student.mentorRemarks}
-                  </td>
-                  <td className="academic-table-td text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button
-                        onClick={() => navigate(`/students/${student.id}`)}
-                        className="px-3 py-1.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs min-h-[44px]"
-                      >
-                        <EyeIcon className="w-3.5 h-3.5" /> View Profile
-                      </button>
-                      {onOpenCounselingModal && (
+                    </td>
+                    <td className="academic-table-td font-mono font-bold text-gray-700 text-xs">
+                      {student.register_no}
+                    </td>
+                    <td className="academic-table-td font-mono font-bold text-gray-700 text-xs">
+                      {student.roll_no}
+                    </td>
+                    <td className="academic-table-td text-xs text-gray-600 font-semibold">
+                      {student.course_degree}
+                    </td>
+                    <td className="academic-table-td text-xs text-gray-600 font-semibold">
+                      {student.year}
+                    </td>
+                    <td className="academic-table-td text-xs text-gray-600 font-semibold">
+                      {student.section}
+                    </td>
+                    <td className="academic-table-td text-xs text-gray-600 font-semibold">
+                      {student.staff_name}
+                    </td>
+                    <td className="academic-table-td text-right">
+                      <div className="flex items-center justify-end space-x-2">
                         <button
-                          onClick={() => onOpenCounselingModal(student)}
-                          className="px-2.5 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-xs rounded-xl transition-all min-h-[44px]"
+                          onClick={() => navigate(`/students/${student.register_no}`)}
+                          className="px-3 py-1.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs min-h-[44px]"
                         >
-                          Counsel
+                          <EyeIcon className="w-3.5 h-3.5" /> View Profile
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        {onOpenCounselingModal && (
+                          <button
+                            onClick={() => onOpenCounselingModal(student)}
+                            className="px-2.5 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-xs rounded-xl transition-all min-h-[44px]"
+                          >
+                            Counsel
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -322,7 +229,7 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
           </div>
         ) : (
           paginatedStudents.map((student, idx) => (
-            <StudentCard key={student.id} student={student} idx={idx} />
+            <StudentCard key={student.register_no} student={student} idx={idx} />
           ))
         )}
       </div>

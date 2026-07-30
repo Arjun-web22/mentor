@@ -1,22 +1,26 @@
 import React from 'react';
 import { MagnifyingGlassIcon, FunnelIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+
 export const FilterPanel = ({
   search,
   onSearchChange,
   departmentId,
   onDepartmentChange,
-  arrearsFilter,
-  onArrearsFilterChange,
-  placementFilter,
-  onPlacementFilterChange,
+  yearFilter,
+  onYearFilterChange,
+  sectionFilter,
+  onSectionFilterChange,
   departments,
   onReset,
 }) => {
+  const years = ['1', '2', '3', '4'];
+  const sections = ['A', 'B', 'C', 'D', 'E', 'F'];
+
   return (
     <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs space-y-3 mb-6">
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-          <FunnelIcon className="w-4 h-4 text-[#5B82C5]" /> Academic Search & Student Filters
+          <FunnelIcon className="w-4 h-4 text-[#5B82C5]" /> Search & Filters
         </h4>
         <button
           onClick={onReset}
@@ -32,7 +36,7 @@ export const FilterPanel = ({
           <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search student or register no..."
+            placeholder="Search by name, register no, roll no..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
@@ -55,31 +59,35 @@ export const FilterPanel = ({
           </select>
         </div>
 
-        {/* Arrears status filter */}
+        {/* Year filter */}
         <div>
           <select
-            value={arrearsFilter}
-            onChange={(e) => onArrearsFilterChange(e.target.value)}
+            value={yearFilter}
+            onChange={(e) => onYearFilterChange(e.target.value)}
             className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
           >
-            <option value="all">All Arrear Statuses</option>
-            <option value="zero">Zero Arrears (Clean Record)</option>
-            <option value="pending">Has Pending Backlogs</option>
-            <option value="cleared">Cleared Arrears History</option>
+            <option value="all">All Years</option>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                Year {year}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Placement status filter */}
+        {/* Section filter */}
         <div>
           <select
-            value={placementFilter}
-            onChange={(e) => onPlacementFilterChange(e.target.value)}
+            value={sectionFilter}
+            onChange={(e) => onSectionFilterChange(e.target.value)}
             className="w-full py-2 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
           >
-            <option value="all">All Placement Statuses</option>
-            <option value="eligible_placed">Placed Students</option>
-            <option value="eligible_unplaced">Eligible for Campus Drives</option>
-            <option value="ineligible_arrears">Ineligible (Pending Arrears)</option>
+            <option value="all">All Sections</option>
+            {sections.map((section) => (
+              <option key={section} value={section}>
+                Section {section}
+              </option>
+            ))}
           </select>
         </div>
       </div>

@@ -25,6 +25,35 @@ const fetchMentor = async (mentorId) => {
 };
 
 /**
+ * Fetch all mentors with assigned students count
+ * @returns {Promise<Array>} Array of mentor objects with assigned students count
+ */
+const getAllMentors = async () => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+        u.user_id,
+        u.staff_id,
+        u.full_name,
+        u.designation,
+        u.email,
+        u.department_id,
+        u.role,
+        u.is_active,
+        u.profile_photo,
+        (SELECT COUNT(*) FROM student s WHERE s.staff_id = u.staff_id) AS assigned_students
+       FROM users u
+       WHERE u.role IN ('MENTOR', 'HOD')
+       ORDER BY u.full_name ASC`
+    );
+    
+    return rows;
+  } catch (error) {
+    throw new Error('Error fetching all mentors: ' + error.message);
+  }
+};
+
+/**
  * Fetch students by mentor ID (placeholder for future implementation)
  * @param {number} mentorId - Mentor user ID
  * @returns {Promise<Object>} Placeholder response
@@ -42,5 +71,6 @@ const fetchStudentsByMentor = async (mentorId) => {
 
 module.exports = {
   fetchMentor,
+  getAllMentors,
   fetchStudentsByMentor
 };

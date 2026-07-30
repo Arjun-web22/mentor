@@ -19,22 +19,45 @@ export const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const { currentUser } = useDashboard();
   const [collapsed, setCollapsed] = useState(false);
 
+  // const navItems = [
+  //   { name: 'Super Admin', path: '/admin', icon: HomeIcon, roles: ['super_admin'] },
+  //   { name: 'Colleges', path: '/colleges', icon: BuildingLibraryIcon, roles: ['super_admin'] },
+  //   { name: 'Departments', path: '/departments', icon: FolderIcon },
+  //   { name: 'Mentor Directory', path: '/mentors', icon: UserIcon, roles: ['super_admin', 'hod'] },
+  //   { name: 'Mentor Dashboard', path: '/mentor', icon: AcademicCapIcon, roles: ['hod', 'mentor'] },
+  //   { name: 'Students Directory', path: '/students', icon: UserGroupIcon },
+  //   { name: 'System Analytics', path: '/analytics', icon: ChartBarIcon },
+  //   { name: 'Settings', path: '/settings', icon: Cog6ToothIcon },
+  // ];
   const navItems = [
-    { name: 'Super Admin', path: '/admin', icon: HomeIcon, roles: ['super_admin'] },
-    { name: 'Colleges', path: '/colleges', icon: BuildingLibraryIcon, roles: ['super_admin'] },
-    { name: 'Departments', path: '/departments', icon: FolderIcon },
-    { name: 'Mentor Dashboard', path: '/mentor', icon: AcademicCapIcon },
-    { name: 'Students Directory', path: '/students', icon: UserGroupIcon },
-    { name: 'System Analytics', path: '/analytics', icon: ChartBarIcon },
-    { name: 'Settings', path: '/settings', icon: Cog6ToothIcon },
-  ];
+  { name: 'Super Admin', path: '/admin', icon: HomeIcon, roles: ['super_admin'] },
+  { name: 'Colleges', path: '/colleges', icon: BuildingLibraryIcon, roles: ['super_admin'] },
+
+  { name: 'Departments', path: '/departments', icon: FolderIcon, roles: ['super_admin', 'hod'] },
+
+  // Super Admin only
+  { name: 'Mentor Directory', path: '/mentors', icon: UserIcon, roles: ['super_admin'] },
+
+  // HOD & Mentor only
+  { name: 'Mentor Dashboard', path: '/mentor', icon: AcademicCapIcon, roles: ['hod', 'mentor'] },
+
+  { name: 'Students Directory', path: '/students', icon: UserGroupIcon, roles: ['super_admin', 'hod', 'mentor'] },
+
+  { name: 'System Analytics', path: '/analytics', icon: ChartBarIcon, roles: ['super_admin'] },
+
+  { name: 'Settings', path: '/settings', icon: Cog6ToothIcon, roles: ['super_admin', 'hod', 'mentor'] },
+];
 
   // Filter items based on active role if applicable, or show all for super admin
+  // const visibleNavItems = navItems.filter((item) => {
+  //   if (!item.roles) return true;
+  //   if (currentUser.role === 'super_admin') return true;
+  //   return item.roles.includes(currentUser.role);
+  // });
   const visibleNavItems = navItems.filter((item) => {
-    if (!item.roles) return true;
-    if (currentUser.role === 'super_admin') return true;
-    return item.roles.includes(currentUser.role);
-  });
+  if (!item.roles) return true;
+  return item.roles.includes(currentUser.role);
+});
 
   const handleNavClick = () => {
     if (isMobile) {

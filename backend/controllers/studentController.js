@@ -1,4 +1,4 @@
-const { getStudentsByStaffId, getStudentByRegisterNo, updateStudent } = require('../models/studentModel');
+const { getStudentsByStaffId, getStudentByRegisterNo, updateStudent, getAllStudents } = require('../models/studentModel');
 
 /**
  * Get students for a specific mentor
@@ -135,8 +135,32 @@ const updateStudentInfo = async (req, res) => {
   }
 };
 
+/**
+ * Get all students
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getAllStudentsController = async (req, res) => {
+  try {
+    const students = await getAllStudents();
+
+    res.json({
+      success: true,
+      count: students.length,
+      data: students
+    });
+  } catch (error) {
+    console.error('Error in getAllStudentsController:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   getMentorStudents,
   getStudent,
-  updateStudentInfo
+  updateStudentInfo,
+  getAllStudentsController
 };

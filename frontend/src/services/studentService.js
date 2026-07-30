@@ -45,3 +45,17 @@ export const updateStudent = async (registerNo, updateData) => {
     throw error;
   }
 };
+
+/**
+ * Get all students
+ * @returns {Promise<Object>} Response with success, count, and data
+ */
+export const getAllStudents = async () => {
+  try {
+    const response = await api.get('/students');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all students:', error);
+    throw error;
+  }
+};

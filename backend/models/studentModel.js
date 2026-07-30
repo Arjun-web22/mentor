@@ -87,8 +87,53 @@ const updateStudent = async (registerNo, updateData) => {
   }
 };
 
+/**
+ * Get all students
+ * @returns {Promise<Array>} Array of all students
+ */
+const getAllStudents = async () => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+        course_degree,
+        year,
+        section,
+        register_no,
+        roll_no,
+        student_name,
+        staff_id,
+        staff_name
+      FROM student`
+    );
+    return rows;
+  } catch (error) {
+    console.error('Error in getAllStudents model:', error);
+    throw error;
+  }
+};
+
+/**
+ * Count students by staff ID (mentor)
+ * @param {string} staffId - Staff ID
+ * @returns {Promise<number>} Count of students
+ */
+const countStudentsByStaffId = async (staffId) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT COUNT(*) as count FROM student WHERE staff_id = ?`,
+      [staffId]
+    );
+    return rows[0].count;
+  } catch (error) {
+    console.error('Error in countStudentsByStaffId model:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   getStudentsByStaffId,
   getStudentByRegisterNo,
-  updateStudent
+  updateStudent,
+  getAllStudents,
+  countStudentsByStaffId
 };

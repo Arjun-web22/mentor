@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs');
 // Hash the temporary admin password
 const TEMP_ADMIN_PASSWORD_HASH = bcrypt.hashSync('admin123', 10);
 
+// Hash the temporary HOD password
+const TEMP_HOD_PASSWORD_HASH = bcrypt.hashSync('hod123', 10);
+
 // Temporary super admin credentials (will be replaced with database records)
 const TEMP_ADMIN = {
   email: 'admin@fxec.edu.in',
@@ -14,6 +17,19 @@ const TEMP_ADMIN = {
   designation: 'Principal',
   department_id: 'ADMIN',
   college_id: 'FXEC',
+  profile_photo: null
+};
+
+// Temporary HOD credentials (will be replaced with database records)
+const TEMP_HOD = {
+  email: 'hod@fxec.edu.in',
+  password: TEMP_HOD_PASSWORD_HASH,
+  role: 'HOD',
+  user_id: 'hod-001',
+  full_name: 'Dr. K. Suresh',
+  designation: 'Head of Department',
+  department_id: 5, // Information Technology
+  college_id: 1,
   profile_photo: null
 };
 
@@ -30,6 +46,15 @@ const login = async (email, password) => {
       const isMatch = await bcrypt.compare(password, TEMP_ADMIN.password);
       if (isMatch) {
         return TEMP_ADMIN;
+      }
+      return null;
+    }
+
+    // Check for temporary HOD
+    if (email === TEMP_HOD.email) {
+      const isMatch = await bcrypt.compare(password, TEMP_HOD.password);
+      if (isMatch) {
+        return TEMP_HOD;
       }
       return null;
     }

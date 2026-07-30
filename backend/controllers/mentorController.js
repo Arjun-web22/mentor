@@ -1,5 +1,34 @@
-const { fetchMentor, fetchStudentsByMentor } = require('../models/mentorModel');
+const { fetchMentor, getAllMentors, fetchStudentsByMentor } = require('../models/mentorModel');
 const { getStudentsByStaffId } = require('../models/studentModel');
+const { getDepartmentName } = require('../models/departmentModel');
+
+/**
+ * Get all mentors
+ * @route GET /api/mentors
+ */
+const getAllMentorsController = async (req, res) => {
+  try {
+    const mentors = await getAllMentors();
+    
+    // Convert department_id to department_name
+    const mentorsWithDepartmentName = mentors.map(mentor => ({
+      ...mentor,
+      department_name: getDepartmentName(mentor.department_id)
+    }));
+    
+    res.status(200).json({
+      success: true,
+      count: mentorsWithDepartmentName.length,
+      data: mentorsWithDepartmentName
+    });
+  } catch (error) {
+    console.error("Error in getAllMentorsController:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 /**
  * Get mentor by ID
@@ -58,6 +87,7 @@ const getStudentsByMentor = async (req, res) => {
 };
 
 module.exports = {
+  getAllMentorsController,
   getMentorById,
   getStudentsByMentor
 };

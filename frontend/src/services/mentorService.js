@@ -1,6 +1,20 @@
 import api from './api';
 
 /**
+ * Get all mentors
+ * @returns {Promise<Array>} Array of mentor objects
+ */
+export const getAllMentors = async () => {
+  try {
+    const response = await api.get('/mentors');
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching all mentors:', error);
+    throw error;
+  }
+};
+
+/**
  * Get mentor by ID
  * @param {number} mentorId - Mentor user ID
  * @returns {Promise<Object>} Mentor object

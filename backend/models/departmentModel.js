@@ -63,8 +63,49 @@ const getDepartmentName = (departmentId) => {
   return DEPARTMENTS[departmentId] || null;
 };
 
+/**
+ * Count students by department ID
+ * @param {number} departmentId - Department ID
+ * @returns {Promise<number>} Count of students
+ */
+const countStudentsByDepartment = async (departmentId) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT COUNT(*) AS count
+       FROM student s
+       INNER JOIN users u
+       ON s.staff_id = u.staff_id
+       WHERE u.department_id = ?`,
+      [departmentId]
+    );
+
+    return rows[0].count;
+  } catch (error) {
+    throw new Error('Error counting students by department: ' + error.message);
+  }
+};
+
+/**
+ * Count mentors by department ID
+ * @param {number} departmentId - Department ID
+ * @returns {Promise<number>} Count of mentors
+ */
+const countMentorsByDepartment = async (departmentId) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT COUNT(*) as count FROM users WHERE department_id = ? AND role = 'MENTOR'`,
+      [departmentId]
+    );
+    return rows[0].count;
+  } catch (error) {
+    throw new Error('Error counting mentors by department: ' + error.message);
+  }
+};
+
 module.exports = {
   fetchDepartments,
   fetchMentorsByDepartment,
-  getDepartmentName
+  getDepartmentName,
+  countStudentsByDepartment,
+  countMentorsByDepartment
 };

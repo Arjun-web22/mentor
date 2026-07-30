@@ -12,6 +12,7 @@ import { SuperAdminDashboard } from '../pages/admin/SuperAdminDashboard';
 import { CollegeManagement } from '../pages/college/CollegeManagement';
 import { DepartmentGrid } from '../pages/department/DepartmentGrid';
 import { MentorsDirectory } from '../pages/mentor/MentorsDirectory';
+import { MentorList } from '../pages/mentor/MentorList';
 import { MentorStudentsDirectory } from '../pages/student/MentorStudentsDirectory';
 import { StudentDetails } from '../pages/student/StudentDetails';
 import { MentorDashboard } from '../pages/mentor/MentorDashboard';
@@ -190,6 +191,16 @@ export const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['MENTOR']}>
             <ProtectedLayout>
               <MentorDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mentors"
+        element={
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD']}>
+            <ProtectedLayout>
+              <MentorList />
             </ProtectedLayout>
           </ProtectedRoute>
         }

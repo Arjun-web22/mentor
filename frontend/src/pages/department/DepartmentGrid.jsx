@@ -141,7 +141,31 @@ export const DepartmentGrid = () => {
                     </span>
                   </div>
 
-                  <h3 className="font-extrabold text-base text-gray-900 leading-snug">{dept.department_name}</h3>
+                  <h3 className="font-extrabold text-base text-gray-900 leading-snug mb-3">{dept.department_name}</h3>
+
+                  {/* Statistics */}
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                      <UserGroupIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{dept.student_count || 0}</p>
+                      <p className="text-[10px] font-bold text-gray-500">Students</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                      <AcademicCapIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{dept.mentor_count || 0}</p>
+                      <p className="text-[10px] font-bold text-gray-500">Mentors</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                      <ChartBarIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-400">--</p>
+                      <p className="text-[10px] font-bold text-gray-500">Avg CGPA</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                      <BriefcaseIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-400">--</p>
+                      <p className="text-[10px] font-bold text-gray-500">Placement %</p>
+                    </div>
+                  </div>
 
                   <button
                     onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}

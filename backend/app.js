@@ -9,6 +9,8 @@ const authRoutes = require('./routes/authRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
 const studentRoutes = require('./routes/studentRoutes');
+const collegeRoutes = require('./routes/collegeRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -27,6 +29,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/mentors', mentorRoutes);
 app.use('/api', studentRoutes);
+app.use('/api', collegeRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

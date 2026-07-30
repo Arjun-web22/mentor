@@ -4,6 +4,7 @@ import { useDashboard } from '../../context/DashboardContext';
 import { StatCard } from '../../components/common/StatCard';
 import { Badge } from '../../components/common/Badge';
 import { getDepartments } from '../../services/departmentService';
+import { getSuperAdminDashboard } from '../../services/dashboardService';
 import {
   BuildingLibraryIcon,
   FolderIcon,
@@ -33,42 +34,54 @@ export const SuperAdminDashboard = () => {
   const navigate = useNavigate();
   const { colleges, departments: contextDepartments, mentors, students } = useDashboard();
   const [departments, setDepartments] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchDepartmentsData = async () => {
+    const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const data = await getDepartments();
-        setDepartments(data);
+        const [departmentsResponse, dashboardResponse] = await Promise.all([
+          getDepartments(),
+          getSuperAdminDashboard()
+        ]);
+        
+        setDepartments(departmentsResponse);
+        setDashboardData(dashboardResponse);
         setError(null);
       } catch (err) {
         setError('Unable to load dashboard data.');
-        console.error('Error fetching departments:', err);
+        console.error('Error fetching dashboard data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDepartmentsData();
+    fetchDashboardData();
   }, []);
 
-  // Compute aggregate metrics
-  const totalColleges = (colleges || []).length;
-  const totalDepartments = departments.length;
-  const totalMentors = (mentors || []).reduce((acc, m) => acc + (m.assignedStudentCount || 0), 142);
-  const totalStudents = 2850;
+  // Use real data from API or fallback to context values
+  const totalColleges = dashboardData?.summary?.totalColleges ?? (colleges || []).length;
+  const totalDepartments = dashboardData?.summary?.totalDepartments ?? departments.length;
+  const totalMentors = dashboardData?.summary?.totalMentors ?? (mentors || []).length;
+  const totalStudents = dashboardData?.summary?.totalStudents ?? 0;
 
   // Data for Department CGPA Bar Chart
-  const deptCgpaData = departments.map((d) => ({
+  const deptCgpaData = dashboardData?.cgpaChart?.map((d) => ({
     name: d.department_id,
-    cgpa: 8.0, // Placeholder - will be calculated from real student data
-    placement: 85, // Placeholder - will be calculated from real student data
+    cgpa: parseFloat(d.avg_cgpa) || 0,
+  })) || departments.map((d) => ({
+    name: d.department_id,
+    cgpa: 8.0,
   }));
 
   // Data for Arrear Distribution Pie Chart
-  const arrearPieData = [
+  const arrearPieData = dashboardData?.arrearChart ? [
+    { name: 'Zero Arrears', value: dashboardData.arrearChart.zeroArrears, color: '#4CAF50' },
+    { name: '1 Pending Arrear', value: dashboardData.arrearChart.oneArrear, color: '#FF9800' },
+    { name: '2+ Pending Arrears', value: dashboardData.arrearChart.twoPlusArrears, color: '#F44336' },
+  ] : [
     { name: 'Zero Arrears', value: 2180, color: '#4CAF50' },
     { name: '1 Pending Arrear', value: 420, color: '#FF9800' },
     { name: '2+ Pending Arrears', value: 250, color: '#F44336' },
@@ -232,7 +245,7 @@ export const SuperAdminDashboard = () => {
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
                   <span className="text-gray-700">{item.name}</span>
                 </div>
-                <span className="text-gray-900">{item.value} ({((item.value / 2850) * 100).toFixed(1)}%)</span>
+                <span className="text-gray-900">{item.value} ({totalStudents > 0 ? ((item.value / totalStudents) * 100).toFixed(1) : 0}%)</span>
               </div>
             ))}
           </div>

@@ -14,6 +14,8 @@ import {
   FunnelIcon,
   ArrowPathIcon,
   UserIcon,
+  Squares2X2Icon,
+  TableCellsIcon,
 } from '@heroicons/react/24/outline';
 
 export const MentorStudentsDirectory = () => {
@@ -25,6 +27,7 @@ export const MentorStudentsDirectory = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('student_name');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [viewMode, setViewMode] = useState('cards');
 
   useEffect(() => {
     const fetchStudentsData = async () => {
@@ -126,9 +129,35 @@ export const MentorStudentsDirectory = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="w-full lg:w-auto flex-1 lg:max-w-md">
-          <div className="relative">
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          {/* View Switch */}
+          <div className="flex bg-gray-100 rounded-xl p-1">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors min-h-[40px] ${
+                viewMode === 'cards'
+                  ? 'bg-white text-[#5B82C5] shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Squares2X2Icon className="w-4 h-4" />
+              Cards
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors min-h-[40px] ${
+                viewMode === 'table'
+                  ? 'bg-white text-[#5B82C5] shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <TableCellsIcon className="w-4 h-4" />
+              Table
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 lg:max-w-md relative">
             <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -203,7 +232,7 @@ export const MentorStudentsDirectory = () => {
       )}
 
       {/* Students Grid */}
-      {!loading && !error && sortedStudents.length > 0 && (
+      {!loading && !error && sortedStudents.length > 0 && viewMode === 'cards' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
           {sortedStudents.map((student) => {
             const avatar = getStudentAvatar(student.student_name);
@@ -275,6 +304,70 @@ export const MentorStudentsDirectory = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Students Table */}
+      {!loading && !error && sortedStudents.length > 0 && viewMode === 'table' && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Avatar</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Register No</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Roll No</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Student Name</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Course</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Year</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Section</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Mentor</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {sortedStudents.map((student) => {
+                  const avatar = getStudentAvatar(student.student_name);
+                  return (
+                    <tr key={student.register_no} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3">
+                        {avatar ? (
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-gray-800"
+                            style={{ backgroundColor: avatar.backgroundColor }}
+                          >
+                            {avatar.initials}
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <UserIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="info" size="sm">{student.register_no}</Badge>
+                      </td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{student.roll_no}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{student.student_name}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{student.course_degree}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{student.year}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{student.section}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-[#5B82C5]">{student.staff_name}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => navigate(`/students/${student.register_no}`)}
+                          className="px-3 py-1.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
+                        >
+                          <EyeIcon className="w-3.5 h-3.5" />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
