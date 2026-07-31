@@ -25,7 +25,9 @@ const ProtectedLayout = ({ children }) => {
   const { isLoggedIn } = useDashboard();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < 1024
+  );
 
   // Detect mobile screen size
   useEffect(() => {
