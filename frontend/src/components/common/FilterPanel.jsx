@@ -52,8 +52,8 @@ export const FilterPanel = ({
           >
             <option value="all">All Departments</option>
             {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.code} - {d.name}
+              <option key={d.department_id} value={d.department_id}>
+                {d.department_name}
               </option>
             ))}
           </select>

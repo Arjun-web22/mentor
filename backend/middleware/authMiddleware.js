@@ -7,6 +7,8 @@ const authenticate = (req, res, next) => {
     // Get token from header
     const authHeader = req.headers.authorization;
     
+    console.log("Authorization Header:", authHeader);
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
@@ -15,27 +17,32 @@ const authenticate = (req, res, next) => {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log("Extracted Token:", token ? 'Present' : 'Missing');
 
-    // For now, we'll use a simple token validation
-    // In production, verify JWT token here
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify JWT token
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
     
-    // For development, accept any non-empty token
-    if (!token || token === 'null' || token === 'undefined') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token.'
-      });
-    }
+    console.log("Decoded JWT:", decoded);
 
-    // Attach user info from token (in production, decode from JWT)
-    // For now, we'll skip this and let the controller handle user info
+    // Attach user info from token to request
+    req.user = {
+      userId: decoded.userId,
+      staff_id: decoded.staff_id,
+      college_id: decoded.college_id,
+      department_id: decoded.department_id,
+      email: decoded.email,
+      role: decoded.role
+    };
+
+    console.log("req.user set:", req.user);
+
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
     return res.status(401).json({
       success: false,
-      message: 'Authentication failed.'
+      message: 'Invalid or expired token.'
     });
   }
 };

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { Badge } from '../../components/common/Badge';
 import { getDepartments } from '../../services/departmentService';
+import { getAllColleges } from '../../services/collegeService';
+import { useCollege } from '../../context/CollegeContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   FolderIcon,
   AcademicCapIcon,
@@ -18,20 +21,42 @@ import {
   WrenchScrewdriverIcon,
   BuildingOfficeIcon,
   BriefcaseIcon,
+  BuildingLibraryIcon,
 } from '@heroicons/react/24/outline';
 
 export const DepartmentGrid = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { selectedCollege, setCollege, loading: collegeLoading } = useCollege();
+  const { user } = useAuth();
   const [departments, setDepartments] = useState([]);
+  const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
 
+  const canSwitchColleges = user?.role === 'SUPER_ADMIN';
+
   useEffect(() => {
-    const fetchDepartmentsData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getDepartments();
+        
+        // Fetch colleges for dropdown - only for SUPER_ADMIN
+        if (canSwitchColleges) {
+          const collegesResponse = await getAllColleges();
+          if (collegesResponse.success) {
+            setColleges(collegesResponse.data);
+          }
+        }
+        
+        // For HOD, call getDepartments() without collegeId parameter
+        // Backend will infer college_id from req.user
+        const collegeIdParam = user?.role === 'HOD' ? undefined : selectedCollege;
+        
+        // Fetch departments with college filter
+        const data = await getDepartments(collegeIdParam);
+        console.log("Departments Data in DepartmentGrid:", data);
         setDepartments(data);
         setError(null);
       } catch (err) {
@@ -42,8 +67,15 @@ export const DepartmentGrid = () => {
       }
     };
 
-    fetchDepartmentsData();
-  }, []);
+    if (!collegeLoading) {
+      fetchData();
+    }
+  }, [selectedCollege, collegeLoading, user, canSwitchColleges]);
+
+  const handleCollegeChange = (e) => {
+    const newCollegeId = e.target.value === 'all' ? null : parseInt(e.target.value);
+    setCollege(newCollegeId);
+  };
 
   const getDepartmentIcon = (name) => {
     if (name.includes('Computer Science')) return ComputerDesktopIcon;
@@ -78,15 +110,37 @@ export const DepartmentGrid = () => {
           </p>
         </div>
 
-        <div className="relative w-full sm:max-w-sm">
-          <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search department by name or HOD..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          {/* College Dropdown - SUPER_ADMIN only */}
+          {canSwitchColleges && (
+            <div className="relative w-full sm:w-48">
+              <BuildingLibraryIcon className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <select
+                value={selectedCollege || 'all'}
+                onChange={handleCollegeChange}
+                className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
+              >
+                <option value="all">All Colleges</option>
+                {colleges.map((college) => (
+                  <option key={college.college_id} value={college.college_id}>
+                    {college.college_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Search */}
+          <div className="relative w-full sm:max-w-sm">
+            <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search department by name or HOD..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#5B82C5]"
+            />
+          </div>
         </div>
       </div>
 
@@ -116,8 +170,12 @@ export const DepartmentGrid = () => {
       {/* Empty State */}
       {!loading && !error && filteredDepartments.length === 0 && (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
-          <FolderIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-sm font-semibold text-gray-600">No departments available.</p>
+          <BuildingLibraryIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-sm font-semibold text-gray-600">
+            {selectedCollege 
+              ? `No departments found for the selected college.`
+              : 'No departments available.'}
+          </p>
         </div>
       )}
 
@@ -145,30 +203,30 @@ export const DepartmentGrid = () => {
 
                   {/* Statistics */}
                   <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <div className="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
                       <UserGroupIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
                       <p className="text-xs font-black text-gray-900">{dept.student_count || 0}</p>
                       <p className="text-[10px] font-bold text-gray-500">Students</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <div className="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
                       <AcademicCapIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
                       <p className="text-xs font-black text-gray-900">{dept.mentor_count || 0}</p>
                       <p className="text-[10px] font-bold text-gray-500">Mentors</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
-                      <ChartBarIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                      <p className="text-xs font-black text-gray-400">--</p>
+                    <div className="bg-[#EBF1FA] border border-[#5B82C5]/20 rounded-lg p-2 text-center">
+                      <ChartBarIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{Number(dept.avg_cgpa || 0).toFixed(2)}</p>
                       <p className="text-[10px] font-bold text-gray-500">Avg CGPA</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
-                      <BriefcaseIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                      <p className="text-xs font-black text-gray-400">--</p>
-                      <p className="text-[10px] font-bold text-gray-500">Placement %</p>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2 text-center">
+                      <AcademicCapIcon className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{Number(dept.avg_attendance || 0).toFixed(2)}%</p>
+                      <p className="text-[10px] font-bold text-gray-500">Avg Attendance</p>
                     </div>
                   </div>
 
                   <button
-                    onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
+                    onClick={() => navigate(`/departments/${dept.department_id}/mentors?collegeId=${selectedCollege}`)}
                     className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-4 min-h-[44px]"
                   >
                     <span>Open Department Portal</span>

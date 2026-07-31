@@ -16,7 +16,7 @@ const TEMP_ADMIN = {
   full_name: 'Dr. S. Raja',
   designation: 'Principal',
   department_id: 'ADMIN',
-  college_id: 'FXEC',
+  college_id: 1,
   profile_photo: null
 };
 

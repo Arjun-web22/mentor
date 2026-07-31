@@ -17,13 +17,25 @@ const getStudentsByStaffId = async (staffId) => {
         roll_no,
         student_name,
         staff_id,
-        staff_name
+        staff_name,
+        cgpa,
+        attendance,
+        pending_arrears
       FROM student 
       WHERE staff_id = ?`,
       [staffId]
     );
     console.log("SQL result length:", rows.length);
-    return rows;
+    
+    // Map field names to match frontend expectations
+    return rows.map(row => ({
+      ...row,
+      name: row.student_name,
+      registerNo: row.register_no,
+      attendancePercentage: row.attendance ? parseFloat(row.attendance) : 0,
+      pendingArrearsCount: row.pending_arrears ? parseInt(row.pending_arrears) : 0,
+      cgpa: row.cgpa ? parseFloat(row.cgpa) : 0
+    }));
   } catch (error) {
     console.error('Error in getStudentsByStaffId model:', error);
     throw error;
@@ -46,7 +58,10 @@ const getStudentByRegisterNo = async (registerNo) => {
         roll_no,
         student_name,
         staff_id,
-        staff_name
+        staff_name,
+        cgpa,
+        attendance,
+        pending_arrears
       FROM student 
       WHERE register_no = ?`,
       [registerNo]
@@ -88,23 +103,52 @@ const updateStudent = async (registerNo, updateData) => {
 };
 
 /**
- * Get all students
+ * Get all students with optional department filtering
+ * @param {number|null} departmentId - Optional department ID to filter by
  * @returns {Promise<Array>} Array of all students
  */
-const getAllStudents = async () => {
+const getAllStudents = async (departmentId = null) => {
   try {
-    const [rows] = await db.query(
-      `SELECT 
-        course_degree,
-        year,
-        section,
-        register_no,
-        roll_no,
-        student_name,
-        staff_id,
-        staff_name
-      FROM student`
-    );
+    let query, params;
+
+    if (departmentId) {
+      // Filter by department using JOIN
+      query = `
+        SELECT 
+          s.course_degree,
+          s.year,
+          s.section,
+          s.register_no,
+          s.roll_no,
+          s.student_name,
+          s.staff_id,
+          s.staff_name,
+          u.department_id
+        FROM student s
+        INNER JOIN users u ON s.staff_id = u.staff_id
+        WHERE u.department_id = ?
+      `;
+      params = [departmentId];
+    } else {
+      // Return all students
+      query = `
+        SELECT 
+          s.course_degree,
+          s.year,
+          s.section,
+          s.register_no,
+          s.roll_no,
+          s.student_name,
+          s.staff_id,
+          s.staff_name,
+          u.department_id
+        FROM student s
+        INNER JOIN users u ON s.staff_id = u.staff_id
+      `;
+      params = [];
+    }
+
+    const [rows] = await db.query(query, params);
     return rows;
   } catch (error) {
     console.error('Error in getAllStudents model:', error);

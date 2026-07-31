@@ -59,6 +59,7 @@ export const DashboardProvider = ({ children }) => {
     designation: authUser.designation,
     department_id: authUser.department_id,
     college_id: authUser.college_id,
+    staff_id: authUser.staff_id,
   } : null;
 
   const isLoggedIn = !!authUser;

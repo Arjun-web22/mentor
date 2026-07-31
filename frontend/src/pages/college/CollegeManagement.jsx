@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { Badge } from '../../components/common/Badge';
 import { getAllColleges } from '../../services/collegeService';
+import { useCollege } from '../../context/CollegeContext';
 import {
   BuildingLibraryIcon,
   MagnifyingGlassIcon,
@@ -15,6 +16,7 @@ import {
 
 export const CollegeManagement = () => {
   const navigate = useNavigate();
+  const { setCollege } = useCollege();
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -184,7 +186,10 @@ export const CollegeManagement = () => {
                   </td>
                   <td className="academic-table-td text-right" onClick={(e) => e.stopPropagation()}>
                     <button
-                      onClick={() => navigate('/departments')}
+                      onClick={() => {
+                        setCollege(col.college_id);
+                        navigate(`/departments?collegeId=${col.college_id}`);
+                      }}
                       className="px-3.5 py-1.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1 shadow-xs min-h-[44px]"
                     >
                       <span>View Departments</span>
@@ -232,7 +237,10 @@ export const CollegeManagement = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate('/departments')}
+                  onClick={() => {
+                    setCollege(col.college_id);
+                    navigate(`/departments?collegeId=${col.college_id}`);
+                  }}
                   className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1 shadow-xs min-h-[44px]"
                 >
                   <span>View Departments</span>

@@ -15,6 +15,7 @@ import {
   SparklesIcon,
   BriefcaseIcon,
   ClockIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 
 export const StudentDetails = () => {
@@ -147,15 +148,6 @@ export const StudentDetails = () => {
       [name]: value
     }));
   };
-
-  // Future section component
-  const FutureSection = ({ icon: Icon, title, description }) => (
-    <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
-      <Icon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-      <h3 className="text-sm font-bold text-gray-900 mb-1">{title}</h3>
-      <p className="text-xs text-gray-500">{description}</p>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -389,40 +381,99 @@ export const StudentDetails = () => {
         </div>
       )}
 
-      {/* Future Sections */}
+      {/* Additional Information */}
       <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
         <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-4">Additional Information</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <FutureSection
-            icon={ClockIcon}
-            title="Attendance"
-            description="Track student attendance records"
-          />
-          <FutureSection
-            icon={ChartBarIcon}
-            title="CGPA & Performance"
-            description="View academic performance metrics"
-          />
-          <FutureSection
-            icon={DocumentTextIcon}
-            title="Semester Results"
-            description="Access semester-wise results"
-          />
-          <FutureSection
-            icon={SparklesIcon}
-            title="Achievements"
-            description="Student achievements and awards"
-          />
-          <FutureSection
-            icon={BriefcaseIcon}
-            title="Placements"
-            description="Placement and career information"
-          />
-          <FutureSection
-            icon={AcademicCapIcon}
-            title="Mentor Notes"
-            description="Notes and feedback from mentors"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Attendance Card */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                student?.attendance >= 90 
+                  ? 'bg-green-100 text-green-600' 
+                  : student?.attendance >= 75 
+                    ? 'bg-amber-100 text-amber-600' 
+                    : 'bg-red-100 text-red-600'
+              }`}>
+                <ClockIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-gray-900">Attendance</h3>
+                <p className="text-[10px] font-bold text-gray-500">Current Attendance</p>
+              </div>
+            </div>
+            <p className={`text-2xl font-black ${
+              student?.attendance >= 90 
+                ? 'text-green-600' 
+                : student?.attendance >= 75 
+                  ? 'text-amber-600' 
+                  : 'text-red-600'
+            }`}>
+              {student?.attendance ? `${Number(student.attendance).toFixed(2)}%` : 'N/A'}
+            </p>
+          </div>
+
+          {/* CGPA Card */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                student?.cgpa >= 8.5 
+                  ? 'bg-green-100 text-green-600' 
+                  : student?.cgpa >= 7.0 
+                    ? 'bg-amber-100 text-amber-600' 
+                    : 'bg-red-100 text-red-600'
+              }`}>
+                <ChartBarIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-gray-900">CGPA</h3>
+                <p className="text-[10px] font-bold text-gray-500">Overall CGPA</p>
+              </div>
+            </div>
+            <p className={`text-2xl font-black ${
+              student?.cgpa >= 8.5 
+                ? 'text-green-600' 
+                : student?.cgpa >= 7.0 
+                  ? 'text-amber-600' 
+                  : 'text-red-600'
+            }`}>
+              {student?.cgpa ? Number(student.cgpa).toFixed(2) : 'N/A'}
+            </p>
+          </div>
+
+          {/* Pending Arrears Card */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                student?.pending_arrears === 0 || student?.pending_arrears === '0' 
+                  ? 'bg-green-100 text-green-600' 
+                  : student?.pending_arrears <= 2 
+                    ? 'bg-amber-100 text-amber-600' 
+                    : 'bg-red-100 text-red-600'
+              }`}>
+                <BookOpenIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-gray-900">Pending Arrears</h3>
+                <p className="text-[10px] font-bold text-gray-500">
+                  {student?.pending_arrears === 0 || student?.pending_arrears === '0' 
+                    ? 'No Pending Arrears' 
+                    : 'Pending Subjects'}
+                </p>
+              </div>
+            </div>
+            <p className={`text-2xl font-black ${
+              student?.pending_arrears === 0 || student?.pending_arrears === '0' 
+                ? 'text-green-600' 
+                : student?.pending_arrears <= 2 
+                  ? 'text-amber-600' 
+                  : 'text-red-600'
+            }`}>
+              {student?.pending_arrears !== null && student?.pending_arrears !== undefined 
+                ? student.pending_arrears 
+                : 'N/A'}
+            </p>
+          </div>
         </div>
       </div>
     </div>

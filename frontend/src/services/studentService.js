@@ -48,11 +48,20 @@ export const updateStudent = async (registerNo, updateData) => {
 
 /**
  * Get all students
+ * @param {Object} params - Query parameters
+ * @param {number|null} params.departmentId - Optional department ID to filter by
  * @returns {Promise<Object>} Response with success, count, and data
  */
-export const getAllStudents = async () => {
+export const getAllStudents = async (params = {}) => {
   try {
-    const response = await api.get('/students');
+    const { departmentId } = params;
+    const queryParams = new URLSearchParams();
+    if (departmentId) {
+      queryParams.append('departmentId', departmentId);
+    }
+    const queryString = queryParams.toString();
+    const url = queryString ? `/students?${queryString}` : '/students';
+    const response = await api.get(url);
     return response.data;
   } catch (error) {
     console.error('Error fetching all students:', error);

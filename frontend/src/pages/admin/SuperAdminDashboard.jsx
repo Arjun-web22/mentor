@@ -69,23 +69,37 @@ export const SuperAdminDashboard = () => {
 
   // Data for Department CGPA Bar Chart
   const deptCgpaData = dashboardData?.cgpaChart?.map((d) => ({
-    name: d.department_id,
-    cgpa: parseFloat(d.avg_cgpa) || 0,
-  })) || departments.map((d) => ({
-    name: d.department_id,
-    cgpa: 8.0,
-  }));
+    name: d.department_name || d.department_id,
+    cgpa: Number(d.avg_cgpa || 0),
+  })) || [];
+
+  // Data for Department Attendance Bar Chart
+  const deptAttendanceData = dashboardData?.attendanceChart?.map((d) => ({
+    name: d.department_name || d.department_id,
+    attendance: Number(d.avg_attendance || 0),
+  })) || [];
+
+  // Data for Student Distribution Chart
+  const studentDistributionData = dashboardData?.studentDistribution?.map((d) => ({
+    name: d.department_name || d.department_id,
+    students: Number(d.total_students || 0),
+  })) || [];
+
+  // Data for Mentor Distribution Chart
+  const mentorDistributionData = dashboardData?.mentorDistribution?.map((d) => ({
+    name: d.department_name || d.department_id,
+    mentors: Number(d.total_mentors || 0),
+  })) || [];
 
   // Data for Arrear Distribution Pie Chart
   const arrearPieData = dashboardData?.arrearChart ? [
     { name: 'Zero Arrears', value: dashboardData.arrearChart.zeroArrears, color: '#4CAF50' },
     { name: '1 Pending Arrear', value: dashboardData.arrearChart.oneArrear, color: '#FF9800' },
     { name: '2+ Pending Arrears', value: dashboardData.arrearChart.twoPlusArrears, color: '#F44336' },
-  ] : [
-    { name: 'Zero Arrears', value: 2180, color: '#4CAF50' },
-    { name: '1 Pending Arrear', value: 420, color: '#FF9800' },
-    { name: '2+ Pending Arrears', value: 250, color: '#F44336' },
-  ];
+  ] : [];
+
+  // Statistics data
+  const statistics = dashboardData?.statistics || {};
 
   return (
     <div className="space-y-6 overflow-x-hidden">
@@ -178,6 +192,45 @@ export const SuperAdminDashboard = () => {
         />
       </div>
 
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
+          <div className="flex items-center space-x-2 mb-2">
+            <ChartBarIcon className="w-5 h-5 text-[#5B82C5]" />
+            <span className="text-xs font-bold text-gray-500 uppercase">Avg CGPA</span>
+          </div>
+          <p className="text-2xl font-black text-gray-900">{Number(statistics.avgCgpa || 0).toFixed(2)}</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
+          <div className="flex items-center space-x-2 mb-2">
+            <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
+            <span className="text-xs font-bold text-gray-500 uppercase">Avg Attendance</span>
+          </div>
+          <p className="text-2xl font-black text-gray-900">{Number(statistics.avgAttendance || 0).toFixed(2)}%</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
+          <div className="flex items-center space-x-2 mb-2">
+            <ExclamationCircleIcon className="w-5 h-5 text-orange-500" />
+            <span className="text-xs font-bold text-gray-500 uppercase">Low Attendance</span>
+          </div>
+          <p className="text-2xl font-black text-orange-600">{Number(statistics.lowAttendanceCount || 0)}</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
+          <div className="flex items-center space-x-2 mb-2">
+            <AcademicCapIcon className="w-5 h-5 text-purple-600" />
+            <span className="text-xs font-bold text-gray-500 uppercase">Top Students</span>
+          </div>
+          <p className="text-2xl font-black text-purple-600">{Number(statistics.topStudentsCount || 0)}</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
+          <div className="flex items-center space-x-2 mb-2">
+            <ChartBarIcon className="w-5 h-5 text-emerald-600" />
+            <span className="text-xs font-bold text-gray-500 uppercase">Highest CGPA</span>
+          </div>
+          <p className="text-2xl font-black text-emerald-600">{Number(statistics.highestCgpa || 0).toFixed(2)}</p>
+        </div>
+      </div>
+
       {/* Charts Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Department CGPA Comparison Bar Chart */}
@@ -250,6 +303,140 @@ export const SuperAdminDashboard = () => {
             ))}
           </div>
         </div>
+
+        {/* Department Attendance Bar Chart */}
+        <div className="lg:col-span-2 bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+            <div>
+              <h3 className="text-sm sm:text-base font-extrabold text-gray-900">Department Average Attendance</h3>
+              <p className="text-xs text-gray-500 font-medium">Comparison of mean attendance by department</p>
+            </div>
+            <Badge variant="info">Scale: 0 - 100%</Badge>
+          </div>
+
+          <div className="h-56 sm:h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={deptAttendanceData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    borderColor: '#E2E8F0',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                />
+                <Bar dataKey="attendance" fill="#10B981" radius={[4, 4, 0, 0]} name="Average Attendance" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Student Distribution Chart */}
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+            <div>
+              <h3 className="text-sm sm:text-base font-extrabold text-gray-900">Student Distribution</h3>
+              <p className="text-xs text-gray-500 font-medium">Students per department</p>
+            </div>
+          </div>
+
+          <div className="h-56 sm:h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={studentDistributionData} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                <XAxis type="number" tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    borderColor: '#E2E8F0',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                />
+                <Bar dataKey="students" fill="#8B5CF6" radius={[0, 4, 4, 0]} name="Students" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Mentor Distribution Chart */}
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+            <div>
+              <h3 className="text-sm sm:text-base font-extrabold text-gray-900">Mentor Distribution</h3>
+              <p className="text-xs text-gray-500 font-medium">Mentors per department</p>
+            </div>
+          </div>
+
+          <div className="h-56 sm:h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={mentorDistributionData} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                <XAxis type="number" tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10, fontWeight: 700, fill: '#374151' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    borderColor: '#E2E8F0',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                />
+                <Bar dataKey="mentors" fill="#F59E0B" radius={[0, 4, 4, 0]} name="Mentors" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Top 5 Mentors Table */}
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-base font-extrabold text-gray-900">Top 5 Performing Mentors</h3>
+            <p className="text-xs text-gray-500 font-medium">Mentors with highest average student CGPA</p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr className="bg-gray-100 border-b border-gray-200">
+                <th className="academic-table-th">Rank</th>
+                <th className="academic-table-th">Staff ID</th>
+                <th className="academic-table-th">Mentor Name</th>
+                <th className="academic-table-th">Avg CGPA</th>
+                <th className="academic-table-th">Total Students</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {dashboardData?.topMentors?.map((mentor, idx) => (
+                <tr key={mentor.staff_id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
+                  <td className="academic-table-td font-extrabold text-gray-900">#{idx + 1}</td>
+                  <td className="academic-table-td font-bold text-gray-800">{mentor.staff_id}</td>
+                  <td className="academic-table-td font-bold text-gray-900">{mentor.full_name}</td>
+                  <td className="academic-table-td">
+                    <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                      {Number(mentor.avg_cgpa || 0).toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="academic-table-td font-bold">{Number(mentor.total_students || 0)}</td>
+                </tr>
+              ))}
+              {(!dashboardData?.topMentors || dashboardData.topMentors.length === 0) && (
+                <tr>
+                  <td colSpan="5" className="academic-table-td text-center text-gray-500 py-8">
+                    No mentor data available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Department Performance Leaderboard Table */}
@@ -257,7 +444,7 @@ export const SuperAdminDashboard = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-extrabold text-gray-900">Department Performance Leaderboard</h3>
-            <p className="text-xs text-gray-500 font-medium">Comprehensive academic metrics across all 8 FXEC departments</p>
+            <p className="text-xs text-gray-500 font-medium">Comprehensive academic metrics across all departments</p>
           </div>
           <button
             onClick={() => navigate('/departments')}
@@ -273,88 +460,103 @@ export const SuperAdminDashboard = () => {
               <tr className="bg-gray-100 border-b border-gray-200">
                 <th className="academic-table-th">Dept Code</th>
                 <th className="academic-table-th">Department Name</th>
-                <th className="academic-table-th">Head of Dept (HOD)</th>
                 <th className="academic-table-th">Students</th>
                 <th className="academic-table-th">Mentors</th>
                 <th className="academic-table-th">Avg CGPA</th>
-                <th className="academic-table-th">Placement %</th>
-                <th className="academic-table-th">Pending Arrears</th>
+                <th className="academic-table-th">Avg Attendance</th>
                 <th className="academic-table-th text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {departments.map((dept, idx) => (
-                <tr key={dept.department_id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
-                  <td className="academic-table-td font-extrabold text-gray-900">{dept.department_id}</td>
-                  <td className="academic-table-td font-bold text-gray-800">{dept.department_name}</td>
-                  <td className="academic-table-td text-gray-700">-</td>
-                  <td className="academic-table-td font-bold">-</td>
-                  <td className="academic-table-td font-semibold">-</td>
-                  <td className="academic-table-td">
-                    <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30">
-                      -
-                    </span>
-                  </td>
-                  <td className="academic-table-td font-bold text-emerald-700">-</td>
-                  <td className="academic-table-td">
-                    <Badge variant="info" size="sm">
-                      N/A
-                    </Badge>
-                  </td>
-                  <td className="academic-table-td text-right">
-                    <button
-                      onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
-                      className="px-3 py-1.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors"
-                    >
-                      Open Portal
-                    </button>
+              {dashboardData?.studentDistribution?.map((dept, idx) => {
+                const mentorCount = dashboardData.mentorDistribution?.find(m => m.department_id === dept.department_id)?.total_mentors || 0;
+                const cgpaData = dashboardData.cgpaChart?.find(c => c.department_id === dept.department_id)?.avg_cgpa;
+                const attendanceData = dashboardData.attendanceChart?.find(a => a.department_id === dept.department_id)?.avg_attendance;
+                
+                return (
+                  <tr key={dept.department_id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
+                    <td className="academic-table-td font-extrabold text-gray-900">{dept.department_id}</td>
+                    <td className="academic-table-td font-bold text-gray-800">{dept.department_name}</td>
+                    <td className="academic-table-td font-bold">{Number(dept.total_students || 0)}</td>
+                    <td className="academic-table-td font-semibold">{Number(mentorCount)}</td>
+                    <td className="academic-table-td">
+                      <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30">
+                        {Number(cgpaData || 0).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="academic-table-td font-bold text-emerald-700">{Number(attendanceData || 0).toFixed(2)}%</td>
+                    <td className="academic-table-td text-right">
+                      <button
+                        onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
+                        className="px-3 py-1.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors"
+                      >
+                        Open Portal
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {(!dashboardData?.studentDistribution || dashboardData.studentDistribution.length === 0) && (
+                <tr>
+                  <td colSpan="7" className="academic-table-td text-center text-gray-500 py-8">
+                    No department data available
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
-          {departments.map((dept, idx) => (
-            <div key={dept.department_id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30 text-sm">
-                  {dept.department_id}
-                </span>
-                <Badge variant="info" size="sm">
-                  N/A
-                </Badge>
+          {dashboardData?.studentDistribution?.map((dept, idx) => {
+            const mentorCount = dashboardData.mentorDistribution?.find(m => m.department_id === dept.department_id)?.total_mentors || 0;
+            const cgpaData = dashboardData.cgpaChart?.find(c => c.department_id === dept.department_id)?.avg_cgpa;
+            const attendanceData = dashboardData.attendanceChart?.find(a => a.department_id === dept.department_id)?.avg_attendance;
+            
+            return (
+              <div key={dept.department_id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-extrabold text-gray-900 bg-[#EBF1FA] text-[#5B82C5] px-2.5 py-1 rounded-lg border border-[#5B82C5]/30 text-sm">
+                    {dept.department_id}
+                  </span>
+                  <Badge variant="info" size="sm">
+                    {Number(attendanceData || 0).toFixed(2)}%
+                  </Badge>
+                </div>
+                <h3 className="font-bold text-gray-800 text-sm mb-1">{dept.department_name}</h3>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Students</span>
+                    <span className="text-sm font-black text-gray-900">{Number(dept.total_students || 0)}</span>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Mentors</span>
+                    <span className="text-sm font-black text-gray-900">{Number(mentorCount)}</span>
+                  </div>
+                  <div className="bg-[#EBF1FA] p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-[#5B82C5] block uppercase">Avg CGPA</span>
+                    <span className="text-sm font-black text-[#5B82C5]">{Number(cgpaData || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="bg-emerald-50 p-2 rounded-lg">
+                    <span className="text-[10px] font-bold text-emerald-700 block uppercase">Attendance</span>
+                    <span className="text-sm font-black text-emerald-800">{Number(attendanceData || 0).toFixed(2)}%</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
+                  className="w-full py-2.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors min-h-[44px]"
+                >
+                  Open Department Portal
+                </button>
               </div>
-              <h3 className="font-bold text-gray-800 text-sm mb-1">{dept.department_name}</h3>
-              <p className="text-xs text-gray-600 mb-3">HOD: -</p>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Students</span>
-                  <span className="text-sm font-black text-gray-900">-</span>
-                </div>
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Mentors</span>
-                  <span className="text-sm font-black text-gray-900">-</span>
-                </div>
-                <div className="bg-[#EBF1FA] p-2 rounded-lg">
-                  <span className="text-[10px] font-bold text-[#5B82C5] block uppercase">Avg CGPA</span>
-                  <span className="text-sm font-black text-[#5B82C5]">-</span>
-                </div>
-                <div className="bg-emerald-50 p-2 rounded-lg">
-                  <span className="text-[10px] font-bold text-emerald-700 block uppercase">Placement %</span>
-                  <span className="text-sm font-black text-emerald-800">-</span>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate(`/departments/${dept.department_id}/mentors`)}
-                className="w-full py-2.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors min-h-[44px]"
-              >
-                Open Department Portal
-              </button>
+            );
+          })}
+          {(!dashboardData?.studentDistribution || dashboardData.studentDistribution.length === 0) && (
+            <div className="text-center text-gray-500 py-8">
+              No department data available
             </div>
-          ))}
+          )}
         </div>
       </div>
         </>

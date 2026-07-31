@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DashboardProvider } from './context/DashboardContext';
+import { CollegeProvider } from './context/CollegeContext';
 import { AppRoutes } from './routes/AppRoutes';
 
 export function App() {
@@ -9,7 +10,9 @@ export function App() {
     <BrowserRouter>
       <AuthProvider>
         <DashboardProvider>
-          <AppRoutes />
+          <CollegeProvider>
+            <AppRoutes />
+          </CollegeProvider>
         </DashboardProvider>
       </AuthProvider>
     </BrowserRouter>

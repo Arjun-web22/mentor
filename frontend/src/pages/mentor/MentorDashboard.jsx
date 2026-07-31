@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../context/DashboardContext';
 import { StatCard } from '../../components/common/StatCard';
@@ -39,16 +39,82 @@ export const MentorDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Mentee list assigned to Dr. K. Arulraj
+  console.log("========== MENTOR DASHBOARD COMPONENT RENDER ==========");
+  console.log("currentUser:", currentUser);
+  console.log("currentUser.staff_id:", currentUser?.staff_id);
+
+  // Fetch student data on component mount
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log("========== MENTOR DASHBOARD DEBUG ==========");
+        console.log("currentUser:", currentUser);
+        console.log("currentUser.staff_id:", currentUser?.staff_id);
+        
+        const response = await getStudentsByMentor(currentUser.staff_id);
+        console.log("API Response:", response);
+        console.log("API Response is array:", Array.isArray(response));
+        console.log("API Response length:", response?.length);
+        
+        // getStudentsByMentor returns an array directly, not {success, data}
+        setStudentsData(response);
+        console.log("setStudentsData called with array length:", response.length);
+      } catch (err) {
+        setError('Unable to connect to server');
+        console.error('Error fetching students:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser?.staff_id) {
+      fetchStudents();
+    }
+  }, [currentUser?.staff_id]);
+
+  // Mentee list assigned to mentor
   const menteeStudents = (studentsData && !studentsData.message) ? studentsData : [];
 
+  // Log menteeStudents updates
+  useEffect(() => {
+    console.log("========== menteeStudents STATE UPDATE ==========");
+    console.log("menteeStudents length:", menteeStudents.length);
+  }, [menteeStudents]);
+  
+  console.log("========== MENTOR DASHBOARD STATE ==========");
+  console.log("menteeStudents length:", menteeStudents.length);
+  console.log("menteeStudents sample:", menteeStudents[0]);
+
   const assignedCount = menteeStudents.length;
-  const highPerformers = menteeStudents.filter((s) => s.cgpa >= 8.5).length;
-  const arrearWatchlist = menteeStudents.filter((s) => s.pendingArrearsCount > 0).length;
-  const placementReady = menteeStudents.filter((s) => s.cgpa >= 7.5 && s.pendingArrearsCount === 0).length;
+  const highPerformers = menteeStudents.filter((s) => Number(s.cgpa) >= 8.5).length;
+  const arrearWatchlist = menteeStudents.filter((s) => Number(s.pendingArrearsCount) > 0).length;
+  const placementReady = menteeStudents.filter((s) => 
+    Number(s.cgpa) >= 7.5 && 
+    Number(s.pendingArrearsCount) === 0 && 
+    Number(s.attendancePercentage) >= 75
+  ).length;
   const avgAttendance = assignedCount > 0 
-    ? (menteeStudents.reduce((acc, s) => acc + (s.attendancePercentage || 0), 0) / assignedCount).toFixed(1)
+    ? (menteeStudents.reduce((acc, s) => acc + Number(s.attendancePercentage || 0), 0) / assignedCount).toFixed(1)
     : '0.0';
+  
+  // Calculate header metrics dynamically
+  const avgCgpa = assignedCount > 0
+    ? (menteeStudents.reduce((acc, s) => acc + Number(s.cgpa || 0), 0) / assignedCount).toFixed(2)
+    : '0.00';
+  const successRate = assignedCount > 0
+    ? ((placementReady / assignedCount) * 100).toFixed(1)
+    : '0.0';
+    
+  console.log("========== MENTOR DASHBOARD METRICS ==========");
+  console.log("assignedCount:", assignedCount);
+  console.log("highPerformers:", highPerformers);
+  console.log("arrearWatchlist:", arrearWatchlist);
+  console.log("placementReady:", placementReady);
+  console.log("avgAttendance:", avgAttendance);
+  console.log("avgCgpa:", avgCgpa);
+  console.log("successRate:", successRate);
 
   // Filtered mentee list for search
   const filteredMentees = menteeStudents.filter(
@@ -59,17 +125,48 @@ export const MentorDashboard = () => {
 
   // Chart data
   const cgpaDistData = [
-    { range: '9.0 - 10.0', count: menteeStudents.filter((s) => s.cgpa >= 9.0).length || 0, fill: '#4CAF50' },
-    { range: '8.0 - 8.9', count: menteeStudents.filter((s) => s.cgpa >= 8.0 && s.cgpa < 9.0).length || 0, fill: '#5B82C5' },
-    { range: '7.0 - 7.9', count: menteeStudents.filter((s) => s.cgpa >= 7.0 && s.cgpa < 8.0).length || 0, fill: '#3B82F6' },
-    { range: 'Below 7.0', count: menteeStudents.filter((s) => s.cgpa < 7.0).length || 0, fill: '#FF9800' },
+    { range: '9.0 - 10.0', count: menteeStudents.filter((s) => Number(s.cgpa) >= 9.0).length || 0, fill: '#4CAF50' },
+    { range: '8.0 - 8.9', count: menteeStudents.filter((s) => Number(s.cgpa) >= 8.0 && Number(s.cgpa) < 9.0).length || 0, fill: '#5B82C5' },
+    { range: '7.0 - 7.9', count: menteeStudents.filter((s) => Number(s.cgpa) >= 7.0 && Number(s.cgpa) < 8.0).length || 0, fill: '#3B82F6' },
+    { range: 'Below 7.0', count: menteeStudents.filter((s) => Number(s.cgpa) < 7.0).length || 0, fill: '#FF9800' },
   ];
 
   const arrearPieData = [
-    { name: '0 Arrears (Clear)', value: menteeStudents.filter((s) => s.pendingArrearsCount === 0).length || 0, color: '#4CAF50' },
-    { name: '1 Pending Arrear', value: menteeStudents.filter((s) => s.pendingArrearsCount === 1).length || 0, color: '#FF9800' },
-    { name: '2+ Pending Arrears', value: menteeStudents.filter((s) => s.pendingArrearsCount >= 2).length || 0, color: '#F44336' },
+    { name: '0 Arrears (Clear)', value: menteeStudents.filter((s) => Number(s.pendingArrearsCount) === 0).length || 0, color: '#4CAF50' },
+    { name: '1 Pending Arrear', value: menteeStudents.filter((s) => Number(s.pendingArrearsCount) === 1).length || 0, color: '#FF9800' },
+    { name: '2+ Pending Arrears', value: menteeStudents.filter((s) => Number(s.pendingArrearsCount) >= 2).length || 0, color: '#F44336' },
   ];
+
+  // Generate priority alerts dynamically
+  const priorityAlerts = menteeStudents
+    .filter(s => Number(s.attendancePercentage) < 75 || Number(s.pendingArrearsCount) > 0 || Number(s.cgpa) >= 9)
+    .map(s => {
+      if (Number(s.attendancePercentage) < 75) {
+        return {
+          ...s,
+          alertType: 'high',
+          alertLabel: 'High Alert',
+          message: `Attendance: ${Number(s.attendancePercentage).toFixed(1)}%. Below 75% threshold.`
+        };
+      } else if (Number(s.pendingArrearsCount) > 0) {
+        return {
+          ...s,
+          alertType: 'warning',
+          alertLabel: 'Warning',
+          message: `${Number(s.pendingArrearsCount)} pending arrears. Needs attention.`
+        };
+      } else if (Number(s.cgpa) >= 9) {
+        return {
+          ...s,
+          alertType: 'success',
+          alertLabel: 'High Performer',
+          message: `CGPA: ${Number(s.cgpa).toFixed(2)}. Excellent academic performance.`
+        };
+      }
+      return null;
+    })
+    .filter(Boolean)
+    .slice(0, 3); // Show top 3 alerts
 
   return (
     <div className="space-y-6 overflow-x-hidden">
@@ -136,11 +233,11 @@ export const MentorDashboard = () => {
           <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 p-2 sm:p-3 rounded-xl border border-gray-200 w-full sm:w-auto justify-center">
             <div className="text-center px-2 sm:px-3 border-r border-gray-200">
               <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase block">Mentee CGPA</span>
-              <span className="text-sm sm:text-base lg:text-lg font-black text-[#5B82C5]">8.28</span>
+              <span className="text-sm sm:text-base lg:text-lg font-black text-[#5B82C5]">{avgCgpa}</span>
             </div>
             <div className="text-center px-2 sm:px-3">
               <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase block">Success Rate</span>
-              <span className="text-sm sm:text-base lg:text-lg font-black text-[#4CAF50]">95.8%</span>
+              <span className="text-sm sm:text-base lg:text-lg font-black text-[#4CAF50]">{successRate}%</span>
             </div>
           </div>
         </div>
@@ -243,30 +340,60 @@ export const MentorDashboard = () => {
             <p className="text-xs text-gray-500 mb-3">Immediate student intervention recommendations</p>
 
             <div className="space-y-2.5">
-              <div className="p-3 bg-red-50 rounded-xl border border-red-200 text-xs">
-                <div className="flex items-center justify-between font-bold text-red-900">
-                  <span>R. Vignesh (960721104002)</span>
-                  <span className="text-[10px] bg-red-200 px-1.5 py-0.5 rounded">High Alert</span>
+              {priorityAlerts.length === 0 ? (
+                <div className="p-3 bg-green-50 rounded-xl border border-green-200 text-xs text-center">
+                  <p className="font-bold text-green-900">No alerts - All students performing well!</p>
                 </div>
-                <p className="text-red-700 mt-1">2 Pending arrears in CS3451 & CS3591. Attendance: 74%.</p>
-                <button
-                  onClick={() => {
-                    const st = menteeStudents.find((s) => s.id === 'stu-1002');
-                    if (st) setSelectedStudentForCounseling(st);
-                  }}
-                  className="mt-2 text-xs font-bold text-[#F44336] underline hover:text-red-900"
-                >
-                  Schedule Counseling Session →
-                </button>
-              </div>
-
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs">
-                <div className="flex items-center justify-between font-bold text-amber-900">
-                  <span>A. Karthi Krishna (960721104001)</span>
-                  <span className="text-[10px] bg-amber-200 px-1.5 py-0.5 rounded">Placed</span>
-                </div>
-                <p className="text-amber-800 mt-1">Placed at Zoho (8.5 LPA). Final NOC document pending signature.</p>
-              </div>
+              ) : (
+                priorityAlerts.map((alert) => (
+                  <div
+                    key={alert.registerNo}
+                    className={`p-3 rounded-xl border text-xs ${
+                      alert.alertType === 'high'
+                        ? 'bg-red-50 border-red-200'
+                        : alert.alertType === 'warning'
+                          ? 'bg-amber-50 border-amber-200'
+                          : 'bg-green-50 border-green-200'
+                    }`}
+                  >
+                    <div className={`flex items-center justify-between font-bold ${
+                      alert.alertType === 'high'
+                        ? 'text-red-900'
+                        : alert.alertType === 'warning'
+                          ? 'text-amber-900'
+                          : 'text-green-900'
+                    }`}>
+                      <span>{alert.name} ({alert.registerNo})</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        alert.alertType === 'high'
+                          ? 'bg-red-200'
+                          : alert.alertType === 'warning'
+                            ? 'bg-amber-200'
+                            : 'bg-green-200'
+                      }`}>
+                        {alert.alertLabel}
+                      </span>
+                    </div>
+                    <p className={`mt-1 ${
+                      alert.alertType === 'high'
+                        ? 'text-red-700'
+                        : alert.alertType === 'warning'
+                          ? 'text-amber-800'
+                          : 'text-green-800'
+                    }`}>
+                      {alert.message}
+                    </p>
+                    {alert.alertType !== 'success' && (
+                      <button
+                        onClick={() => setSelectedStudentForCounseling(alert)}
+                        className="mt-2 text-xs font-bold underline hover:opacity-80"
+                      >
+                        Schedule Counseling Session →
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -308,16 +435,18 @@ export const MentorDashboard = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredMentees.map((st, idx) => (
-                <tr key={st.id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
-                  <td className="academic-table-td font-black text-gray-900">#{st.departmentRank}</td>
+                <tr key={st.registerNo} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
+                  <td className="academic-table-td font-black text-gray-900">#{idx + 1}</td>
                   <td className="academic-table-td font-mono font-bold text-gray-700">{st.registerNo}</td>
                   <td className="academic-table-td">
                     <div className="flex items-center space-x-2.5">
-                      <img src={st.avatar} alt={st.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover border max-w-full h-auto" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#EBF1FA] text-[#5B82C5] flex items-center justify-center font-bold text-xs border">
+                        {st.name?.charAt(0) || '?'}
+                      </div>
                       <span className="font-bold text-gray-900">{st.name}</span>
                     </div>
                   </td>
-                  <td className="academic-table-td font-black text-[#5B82C5]">{st.cgpa.toFixed(2)}</td>
+                  <td className="academic-table-td font-black text-[#5B82C5]">{st.cgpa?.toFixed(2) || 'N/A'}</td>
                   <td className="academic-table-td">
                     {st.pendingArrearsCount === 0 ? (
                       <Badge variant="success" size="sm">0 Backlogs</Badge>
@@ -325,20 +454,20 @@ export const MentorDashboard = () => {
                       <Badge variant="danger" size="sm">{st.pendingArrearsCount} Pending</Badge>
                     )}
                   </td>
-                  <td className="academic-table-td font-bold">{st.attendancePercentage}%</td>
+                  <td className="academic-table-td font-bold">{st.attendancePercentage?.toFixed(1) || 'N/A'}%</td>
                   <td className="academic-table-td">
-                    {st.placementStatus === 'eligible_placed' ? (
-                      <Badge variant="success" size="sm">Placed ({st.companyName})</Badge>
-                    ) : st.placementStatus === 'ineligible_arrears' ? (
+                    {st.cgpa >= 7.5 && st.pendingArrearsCount === 0 && st.attendancePercentage >= 75 ? (
+                      <Badge variant="success" size="sm">Eligible</Badge>
+                    ) : st.pendingArrearsCount > 0 ? (
                       <Badge variant="danger" size="sm">Ineligible</Badge>
                     ) : (
-                      <Badge variant="info" size="sm">Eligible</Badge>
+                      <Badge variant="info" size="sm">Needs Improvement</Badge>
                     )}
                   </td>
                   <td className="academic-table-td text-right">
                     <div className="flex items-center justify-end space-x-2">
                       <button
-                        onClick={() => navigate(`/students/${st.id}`)}
+                        onClick={() => navigate(`/students/${st.registerNo}`)}
                         className="px-3 py-1.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors"
                       >
                         Profile
@@ -365,19 +494,17 @@ export const MentorDashboard = () => {
             </div>
           ) : (
             filteredMentees.map((student, idx) => (
-              <div key={student.id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+              <div key={student.registerNo} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
                 <div className="flex items-center space-x-3 mb-3">
-                  <img
-                    src={student.avatar}
-                    alt={student.name}
-                    className="w-12 h-12 rounded-lg object-cover border border-gray-200 max-w-full h-auto flex-shrink-0"
-                  />
+                  <div className="w-12 h-12 rounded-lg bg-[#EBF1FA] text-[#5B82C5] flex items-center justify-center font-bold text-lg border flex-shrink-0">
+                    {student.name?.charAt(0) || '?'}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-gray-900 text-sm truncate">{student.name}</h3>
                     <p className="text-xs text-gray-500 font-mono">{student.registerNo}</p>
                   </div>
                   <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 text-xs flex-shrink-0">
-                    #{student.departmentRank}
+                    #{idx + 1}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
@@ -386,7 +513,7 @@ export const MentorDashboard = () => {
                     <span className={`font-black text-sm ${
                       student.cgpa >= 8.5 ? 'text-[#4CAF50]' : student.cgpa >= 7.5 ? 'text-blue-700' : 'text-amber-700'
                     }`}>
-                      {student.cgpa.toFixed(2)}
+                      {student.cgpa?.toFixed(2) || 'N/A'}
                     </span>
                   </div>
                   <div className="bg-gray-50 p-2 rounded-lg">
@@ -394,7 +521,7 @@ export const MentorDashboard = () => {
                     <span className={`font-black text-sm ${
                       student.attendancePercentage >= 85 ? 'text-[#4CAF50]' : student.attendancePercentage >= 75 ? 'text-blue-700' : 'text-[#F44336]'
                     }`}>
-                      {student.attendancePercentage}%
+                      {student.attendancePercentage?.toFixed(1) || 'N/A'}%
                     </span>
                   </div>
                   <div className="bg-gray-50 p-2 rounded-lg">
@@ -407,19 +534,17 @@ export const MentorDashboard = () => {
                   </div>
                   <div className="bg-gray-50 p-2 rounded-lg">
                     <span className="text-[10px] font-bold text-gray-400 block uppercase">Placement</span>
-                    {student.placementStatus === 'eligible_placed' && (
-                      <span className="font-black text-xs text-[#4CAF50]">Placed</span>
-                    )}
-                    {student.placementStatus === 'eligible_unplaced' && (
-                      <span className="font-black text-xs text-blue-700">Eligible</span>
-                    )}
-                    {student.placementStatus === 'ineligible_arrears' && (
+                    {student.cgpa >= 7.5 && student.pendingArrearsCount === 0 && student.attendancePercentage >= 75 ? (
+                      <span className="font-black text-xs text-[#4CAF50]">Eligible</span>
+                    ) : student.pendingArrearsCount > 0 ? (
                       <span className="font-black text-xs text-[#F44336]">Ineligible</span>
+                    ) : (
+                      <span className="font-black text-xs text-blue-700">Needs Improvement</span>
                     )}
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate(`/students/${student.id}`)}
+                  onClick={() => navigate(`/students/${student.registerNo}`)}
                   className="w-full py-2.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
                 >
                   <EyeIcon className="w-3.5 h-3.5" /> View Profile

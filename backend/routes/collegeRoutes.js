@@ -6,8 +6,8 @@ const { authenticate, authorize } = require('../middleware/authMiddleware');
 /**
  * @route   GET /api/colleges
  * @desc    Get all colleges with statistics
- * @access  Public (for development)
+ * @access  SUPER_ADMIN
  */
-router.get('/colleges', getAllCollegesController);
+router.get('/colleges', authenticate, authorize('SUPER_ADMIN'), getAllCollegesController);
 
 module.exports = router;

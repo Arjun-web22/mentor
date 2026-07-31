@@ -38,8 +38,11 @@ export const Sidebar = ({ isOpen, onClose, isMobile }) => {
   // Super Admin only
   { name: 'Mentor Directory', path: '/mentors', icon: UserIcon, roles: ['super_admin'] },
 
-  // HOD & Mentor only
-  { name: 'Mentor Dashboard', path: '/mentor', icon: AcademicCapIcon, roles: ['hod', 'mentor'] },
+  // HOD only
+  { name: 'Dashboard', path: '/hod', icon: AcademicCapIcon, roles: ['hod'] },
+
+  // Mentor only
+  { name: 'Mentor Dashboard', path: '/mentor', icon: AcademicCapIcon, roles: ['mentor'] },
 
   { name: 'Students Directory', path: '/students', icon: UserGroupIcon, roles: ['super_admin', 'hod', 'mentor'] },
 

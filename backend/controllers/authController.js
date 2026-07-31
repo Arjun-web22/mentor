@@ -31,10 +31,13 @@ const loginUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
+      {
         userId: user.user_id,
+        staff_id: user.staff_id,
+        college_id: user.college_id,
+        department_id: user.department_id,
         email: user.email,
-        role: user.role 
+        role: user.role
       },
       process.env.JWT_SECRET || 'your-secret-key-change-in-production',
       { expiresIn: '24h' }
@@ -107,10 +110,13 @@ const googleLogin = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
+      {
         userId: user.user_id,
+        staff_id: user.staff_id,
+        college_id: user.college_id,
+        department_id: user.department_id,
         email: user.email,
-        role: user.role 
+        role: user.role
       },
       process.env.JWT_SECRET || 'your-secret-key-change-in-production',
       { expiresIn: '24h' }

@@ -16,6 +16,7 @@ import { MentorList } from '../pages/mentor/MentorList';
 import { MentorStudentsDirectory } from '../pages/student/MentorStudentsDirectory';
 import { StudentDetails } from '../pages/student/StudentDetails';
 import { MentorDashboard } from '../pages/mentor/MentorDashboard';
+import { HODDashboard } from '../pages/hod/HODDashboard';
 import { StudentList } from '../pages/student/StudentList';
 import { StudentProfile } from '../pages/student/StudentProfile';
 import { SystemSettings } from '../pages/settings/SystemSettings';
@@ -191,6 +192,16 @@ export const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['MENTOR']}>
             <ProtectedLayout>
               <MentorDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/hod"
+        element={
+          <ProtectedRoute allowedRoles={['HOD']}>
+            <ProtectedLayout>
+              <HODDashboard />
             </ProtectedLayout>
           </ProtectedRoute>
         }

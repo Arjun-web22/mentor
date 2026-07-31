@@ -33,8 +33,15 @@ export const StudentList = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        
+        // Build query params for students
+        const studentParams = {};
+        if (departmentId !== 'all') {
+          studentParams.departmentId = parseInt(departmentId);
+        }
+        
         const [studentsResponse, departmentsResponse] = await Promise.all([
-          getAllStudents(),
+          getAllStudents(studentParams),
           getDepartments()
         ]);
 
@@ -56,20 +63,19 @@ export const StudentList = () => {
     };
 
     fetchData();
-  }, []);
+  }, [departmentId]);
 
-  // Client side filtering
+  // Client side filtering (search, year, section - department is handled server-side)
   const filteredStudents = students.filter((s) => {
     const matchesSearch =
       s.student_name?.toLowerCase().includes(search.toLowerCase()) ||
       s.register_no?.toLowerCase().includes(search.toLowerCase()) ||
       s.roll_no?.toLowerCase().includes(search.toLowerCase());
 
-    const matchesDept = departmentId === 'all' || s.department_id === parseInt(departmentId);
     const matchesYear = yearFilter === 'all' || s.year === yearFilter;
     const matchesSection = sectionFilter === 'all' || s.section === sectionFilter;
 
-    return matchesSearch && matchesDept && matchesYear && matchesSection;
+    return matchesSearch && matchesYear && matchesSection;
   });
 
   const handleResetFilters = () => {

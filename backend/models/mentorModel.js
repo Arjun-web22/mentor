@@ -1,17 +1,17 @@
 const pool = require('../config/db');
 
 /**
- * Fetch mentor by ID
- * @param {number} mentorId - Mentor user ID
+ * Fetch mentor by staff_id
+ * @param {string} staffId - Mentor staff ID
  * @returns {Promise<Object|null>} Mentor object or null if not found
  */
-const fetchMentor = async (mentorId) => {
+const fetchMentor = async (staffId) => {
   try {
     const [rows] = await pool.query(
       `SELECT user_id, staff_id, full_name, designation, email, department_id 
        FROM users 
-       WHERE user_id = ?`,
-      [mentorId]
+       WHERE staff_id = ?`,
+      [staffId]
     );
     
     if (rows.length === 0) {

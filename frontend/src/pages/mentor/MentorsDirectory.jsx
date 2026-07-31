@@ -32,6 +32,7 @@ export const MentorsDirectory = () => {
       try {
         setLoading(true);
         const data = await getMentorsByDepartment(departmentId);
+        console.log("Mentors Data in MentorsDirectory:", data);
         setMentors(data);
         setError(null);
       } catch (err) {
@@ -211,35 +212,35 @@ export const MentorsDirectory = () => {
                   <div className="space-y-1.5 text-xs font-semibold text-gray-600 pb-3 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <EnvelopeIcon className="w-3.5 h-3.5 text-[#5B82C5] flex-shrink-0" />
-                      <span className="truncate">{mentor.email}</span>
+                      <span className="truncate">{mentor.email || '--'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <PhoneIcon className="w-3.5 h-3.5 text-[#5B82C5] flex-shrink-0" />
-                      <span className="truncate">--</span>
+                      <span className="truncate">{mentor.phone || '--'}</span>
                     </div>
                   </div>
 
                   {/* Statistics */}
                   <div className="grid grid-cols-2 gap-2 mt-3">
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <div className="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
                       <UserGroupIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
-                      <p className="text-xs font-black text-gray-900">{mentor.student_count || 0}</p>
+                      <p className="text-xs font-black text-gray-900">{mentor.total_students || 0}</p>
                       <p className="text-[10px] font-bold text-gray-500">Mentees</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
-                      <ChartBarIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                      <p className="text-xs font-black text-gray-400">--</p>
+                    <div className="bg-[#EBF1FA] border border-[#5B82C5]/20 rounded-lg p-2 text-center">
+                      <ChartBarIcon className="w-4 h-4 text-[#5B82C5] mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{Number(mentor.avg_cgpa || 0).toFixed(2)}</p>
                       <p className="text-[10px] font-bold text-gray-500">Avg CGPA</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
-                      <CheckCircleIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                      <p className="text-xs font-black text-gray-400">--</p>
-                      <p className="text-[10px] font-bold text-gray-500">Attendance</p>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2 text-center">
+                      <CheckCircleIcon className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{Number(mentor.avg_attendance || 0).toFixed(2)}%</p>
+                      <p className="text-[10px] font-bold text-gray-500">Avg Attendance</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
-                      <ExclamationTriangleIcon className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                      <p className="text-xs font-black text-gray-400">--</p>
-                      <p className="text-[10px] font-bold text-gray-500">Placement</p>
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
+                      <ExclamationTriangleIcon className="w-4 h-4 text-orange-500 mx-auto mb-1" />
+                      <p className="text-xs font-black text-gray-900">{Number(mentor.total_arrears || 0)}</p>
+                      <p className="text-[10px] font-bold text-gray-500">Pending Arrears</p>
                     </div>
                   </div>
                 </div>
@@ -270,11 +271,11 @@ export const MentorsDirectory = () => {
                   <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Avatar</th>
                   <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Staff ID</th>
                   <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Mentor Name</th>
-                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Department</th>
                   <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Designation</th>
-                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Assigned Students</th>
-                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Email</th>
-                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Mentees</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Avg CGPA</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Avg Attendance</th>
+                  <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Pending Arrears</th>
                   <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-black text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -282,7 +283,7 @@ export const MentorsDirectory = () => {
                 {filteredMentors.map((mentor) => {
                   const avatar = getMentorAvatar(mentor.full_name);
                   return (
-                    <tr key={mentor.user_id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={mentor.staff_id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3">
                         {avatar ? (
                           <div
@@ -303,13 +304,11 @@ export const MentorsDirectory = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{mentor.full_name}</td>
-                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">--</td>
                       <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{mentor.designation}</td>
-                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{mentor.student_count || 0}</td>
-                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{mentor.email}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant="success" size="sm">Active</Badge>
-                      </td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{mentor.total_students || 0}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{Number(mentor.avg_cgpa || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{Number(mentor.avg_attendance || 0).toFixed(2)}%</td>
+                      <td className="px-4 py-3 text-xs sm:text-sm font-bold text-gray-900">{Number(mentor.total_arrears || 0)}</td>
                       <td className="px-4 py-3">
                         <button
                           onClick={() =>

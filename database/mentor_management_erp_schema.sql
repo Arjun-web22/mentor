@@ -2,6 +2,24 @@
 CREATE DATABASE IF NOT EXISTS mentor_management_erp;
 USE mentor_management_erp;
 
+CREATE TABLE users (
+    user_id VARCHAR(50) PRIMARY KEY,
+    staff_id VARCHAR(20),
+    college_id BIGINT UNSIGNED,
+    department_id BIGINT UNSIGNED,
+    full_name VARCHAR(150) NOT NULL,
+    designation VARCHAR(100),
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255),
+    role ENUM('SUPER_ADMIN','HOD','MENTOR') NOT NULL,
+    profile_photo VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (college_id) REFERENCES colleges(college_id) ON DELETE SET NULL,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL
+);
+
 CREATE TABLE colleges (
     college_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     college_code VARCHAR(20) UNIQUE NOT NULL,
@@ -50,11 +68,11 @@ CREATE TABLE mentors (
 
 CREATE TABLE students (
     student_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    register_number VARCHAR(20) UNIQUE NOT NULL,
+    register_no VARCHAR(20) UNIQUE NOT NULL,
     full_name VARCHAR(150) NOT NULL,
     college_id BIGINT UNSIGNED NOT NULL,
     department_id BIGINT UNSIGNED NOT NULL,
-    mentor_id BIGINT UNSIGNED NOT NULL,
+    staff_id VARCHAR(20) NOT NULL,
     year INT,
     semester INT,
     section VARCHAR(10),
@@ -64,12 +82,14 @@ CREATE TABLE students (
     phone VARCHAR(20),
     profile_photo VARCHAR(255),
     admission_year YEAR,
+    cgpa DECIMAL(4,2),
+    attendance DECIMAL(5,2),
+    pending_arrears INT DEFAULT 0,
     status ENUM('ACTIVE','GRADUATED','DROPPED') DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (college_id) REFERENCES colleges(college_id) ON DELETE CASCADE,
-    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE CASCADE,
-    FOREIGN KEY (mentor_id) REFERENCES mentors(mentor_id) ON DELETE CASCADE
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE CASCADE
 );
 
 CREATE TABLE subjects (
@@ -108,6 +128,7 @@ CREATE TABLE arrears (
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE
 );
 
+-- Update attendance table to match backend expectations
 CREATE TABLE attendance (
     attendance_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     student_id BIGINT UNSIGNED NOT NULL,

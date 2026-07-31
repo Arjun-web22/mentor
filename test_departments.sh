@@ -1,0 +1,1 @@
+curl -X GET "http://localhost:5000/api/departments?collegeId=1" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJob2QtMDAxIiwiZGVwYXJ0bWVudF9pZCI6NSwiZW1haWwiOiJob2RAZnhlYy5lZHUuaW4iLCJyb2xlIjoiSE9EIiwiaWF0IjoxNzg1NDc2MjE0LCJleHAiOjE3ODU1NjI2MTR9.CCuP3NjdEIhQ4q6XoOMH0K1WSuTNTjWL2beLhy4PgbA"

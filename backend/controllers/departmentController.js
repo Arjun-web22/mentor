@@ -1,5 +1,7 @@
-const { fetchDepartments, fetchMentorsByDepartment, getDepartmentName, countStudentsByDepartment, countMentorsByDepartment } = require('../models/departmentModel');
-const { countStudentsByStaffId } = require('../models/studentModel');
+const { fetchDepartments, fetchMentorsByDepartment, getDepartmentName, getDepartmentAnalytics, getMentorAnalyticsByDepartment } = require('../models/departmentModel');
+
+// Rename model function to avoid naming conflict with controller function
+const fetchMentorsByDepartmentModel = fetchMentorsByDepartment;
 
 /**
  * Get all departments with statistics
@@ -7,32 +9,71 @@ const { countStudentsByStaffId } = require('../models/studentModel');
  */
 const getDepartments = async (req, res) => {
   try {
-    const departments = await fetchDepartments();
+    const { collegeId } = req.query;
     
-    // Add statistics to each department
-    const departmentsWithStats = await Promise.all(
-      departments.map(async (dept) => {
-        const [studentCount, mentorCount] = await Promise.all([
-          countStudentsByDepartment(dept.department_id),
-          countMentorsByDepartment(dept.department_id)
-        ]);
-        
-        return {
-          ...dept,
-          student_count: studentCount,
-          mentor_count: mentorCount
-        };
-      })
-    );
+    console.log("getDepartments - collegeId:", collegeId);
+    console.log("getDepartments - req.user:", req.user);
+    
+    // Default to user's college_id if no collegeId provided
+    const effectiveCollegeId = collegeId ? parseInt(collegeId) : req.user.college_id;
+    
+    // College permission validation
+    if (collegeId && req.user.role !== 'SUPER_ADMIN') {
+      // Non-SUPER_ADMIN users can only access their own college
+      if (parseInt(collegeId) !== req.user.college_id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only view your own college data.'
+        });
+      }
+    }
+    // If no collegeId provided, backend infers from req.user.college_id (line 18)
+    
+    const departments = await fetchDepartments(effectiveCollegeId);
+    const analytics = await getDepartmentAnalytics(effectiveCollegeId);
+    
+    console.log("Departments from fetchDepartments:", departments);
+    console.log("Analytics from getDepartmentAnalytics:", analytics);
+    
+    // Merge analytics with department data
+    const departmentsWithStats = departments.map(dept => {
+      const deptAnalytics = analytics.find(a => a.department_id === dept.department_id) || {
+        student_count: 0,
+        mentor_count: 0,
+        avg_cgpa: 0,
+        avg_attendance: 0
+      };
+      
+      return {
+        ...dept,
+        student_count: deptAnalytics.student_count,
+        mentor_count: deptAnalytics.mentor_count,
+        avg_cgpa: deptAnalytics.avg_cgpa,
+        avg_attendance: deptAnalytics.avg_attendance
+      };
+    });
+    
+    console.log("API Response departmentsWithStats:", departmentsWithStats);
+    
+    // Role-based filtering
+    let filteredDepartments = departmentsWithStats;
+    if (req.user.role === 'HOD' || req.user.role === 'MENTOR') {
+      // HOD and MENTOR only see their own department
+      filteredDepartments = departmentsWithStats.filter(dept => dept.department_id === req.user.department_id);
+    }
+    // SUPER_ADMIN sees all departments in their college
     
     res.status(200).json({
       success: true,
-      data: departmentsWithStats
+      data: filteredDepartments
     });
   } catch (error) {
+    console.error("getDepartments - Error:", error);
+    console.error("getDepartments - Error stack:", error.stack);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
+      stack: error.stack
     });
   }
 };
@@ -41,35 +82,36 @@ const getDepartments = async (req, res) => {
  * Get mentors by department ID
  * @route GET /api/departments/:departmentId/mentors
  */
-const getMentorsByDepartment = async (req, res) => {
+const getMentorsByDepartmentController = async (req, res) => {
   try {
     const { departmentId } = req.params;
+    const { collegeId } = req.query;
     
-    // Validate department ID
-    const departmentName = getDepartmentName(parseInt(departmentId));
-    if (!departmentName) {
-      return res.status(404).json({
-        success: false,
-        message: 'Department not found'
-      });
+    // Role-based access control
+    if (req.user.role === 'HOD' || req.user.role === 'MENTOR') {
+      // HOD and MENTOR can only access their own department
+      if (parseInt(departmentId) !== req.user.department_id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only view your own department.'
+        });
+      }
     }
+    // SUPER_ADMIN can access any department
     
-    const mentors = await fetchMentorsByDepartment(departmentId);
+    const mentors = await fetchMentorsByDepartmentModel(departmentId, collegeId ? parseInt(collegeId) : null);
     
-    // Add student count to each mentor
-    const mentorsWithCount = await Promise.all(
-      mentors.map(async (mentor) => {
-        const studentCount = await countStudentsByStaffId(mentor.staff_id);
-        return {
-          ...mentor,
-          student_count: studentCount
-        };
-      })
+    // Add department_name to each mentor
+    const mentorsWithDepartmentName = await Promise.all(
+      mentors.map(async mentor => ({
+        ...mentor,
+        department_name: await getDepartmentName(mentor.department_id)
+      }))
     );
     
     res.status(200).json({
       success: true,
-      data: mentorsWithCount
+      data: mentorsWithDepartmentName
     });
   } catch (error) {
     res.status(500).json({
@@ -81,5 +123,5 @@ const getMentorsByDepartment = async (req, res) => {
 
 module.exports = {
   getDepartments,
-  getMentorsByDepartment
+  getMentorsByDepartment: getMentorsByDepartmentController
 };
