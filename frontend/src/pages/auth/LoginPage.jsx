@@ -8,7 +8,6 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const googleButtonRef = useRef(null);
-  const [selectedRole, setSelectedRole] = useState('mentor');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -148,17 +147,6 @@ export const LoginPage = () => {
     }
   };
 
-  const handleDemoSelect = (role) => {
-    setSelectedRole(role);
-    if (role === 'super_admin') {
-      setUsername('admin@fxec.edu.in');
-    } else if (role === 'hod') {
-      setUsername('hod@fxec.edu.in');
-    } else {
-      setUsername('mentor@fxec.edu.in');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#EEF3F8] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       {/* Institutional Top Header */}
@@ -180,48 +168,6 @@ export const LoginPage = () => {
       {/* Main Login Card */}
       <div className="mt-8 w-full max-w-md mx-auto">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-200 sm:px-10">
-          {/* Quick Demo Role Selector */}
-          <div className="mb-6 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
-            <span className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center mb-1.5">
-              Select Demo Role Persona
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
-              <button
-                type="button"
-                onClick={() => handleDemoSelect('super_admin')}
-                className={`py-2.5 px-1 text-center text-xs font-bold rounded-lg transition-all min-h-[44px] ${
-                  selectedRole === 'super_admin'
-                    ? 'bg-[#5B82C5] text-white shadow-xs'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Super Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoSelect('hod')}
-                className={`py-2.5 px-1 text-center text-xs font-bold rounded-lg transition-all min-h-[44px] ${
-                  selectedRole === 'hod'
-                    ? 'bg-[#5B82C5] text-white shadow-xs'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                HOD CSE
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoSelect('mentor')}
-                className={`py-2.5 px-1 text-center text-xs font-bold rounded-lg transition-all min-h-[44px] ${
-                  selectedRole === 'mentor'
-                    ? 'bg-[#5B82C5] text-white shadow-xs'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Faculty Mentor
-              </button>
-            </div>
-          </div>
-
           {/* Error Message */}
           {error && (
             <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4">
