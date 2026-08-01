@@ -14,7 +14,7 @@ const getAllMentorsController = async (req, res) => {
     let filteredMentors = mentors;
     if (req.user.role === 'HOD') {
       // HOD only sees mentors in their department
-      filteredMentors = mentors.filter(mentor => mentor.department_id === req.user.department_id);
+      filteredMentors = mentors.filter(mentor => Number(mentor.department_id) === Number(req.user.department_id));
     }
     // SUPER_ADMIN sees all mentors
     
@@ -60,7 +60,7 @@ const getMentorById = async (req, res) => {
     } else if (req.user.role === 'HOD') {
       // HOD can only view mentors in their department
       const mentor = await fetchMentor(mentorId);
-      if (!mentor || mentor.department_id !== req.user.department_id) {
+      if (!mentor || Number(mentor.department_id) !== Number(req.user.department_id)) {
         return res.status(403).json({
           success: false,
           message: 'Access denied. You can only view mentors in your department.'
@@ -134,7 +134,7 @@ const getStudentsByMentor = async (req, res) => {
       console.log("req.user.department_id:", req.user.department_id);
       console.log("Comparison result:", mentor.department_id === req.user.department_id);
       
-      if (mentor.department_id !== req.user.department_id) {
+      if (mentor.department_id !== req.user.department_id && Number(mentor.department_id) !== Number(req.user.department_id)) {
         console.log("403 REASON: Mentor belongs to different department");
         return res.status(403).json({
           success: false,

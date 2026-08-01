@@ -77,7 +77,7 @@ const getDepartmentCGPA = async () => {
        GROUP BY u.department_id
        ORDER BY u.department_id`
     );
-    return rows;
+    return rows.map(row => ({ ...row, department_id: Number(row.department_id) }));
   } catch (error) {
     throw new Error('Error fetching department CGPA: ' + error.message);
   }
@@ -99,7 +99,7 @@ const getDepartmentAttendance = async () => {
        GROUP BY u.department_id
        ORDER BY u.department_id`
     );
-    return rows;
+    return rows.map(row => ({ ...row, department_id: Number(row.department_id) }));
   } catch (error) {
     throw new Error('Error fetching department attendance: ' + error.message);
   }
@@ -120,7 +120,7 @@ const getDepartmentStudentCount = async () => {
        GROUP BY u.department_id
        ORDER BY u.department_id`
     );
-    return rows;
+    return rows.map(row => ({ ...row, department_id: Number(row.department_id) }));
   } catch (error) {
     throw new Error('Error fetching department student count: ' + error.message);
   }
@@ -141,7 +141,7 @@ const getDepartmentMentorCount = async () => {
        GROUP BY department_id
        ORDER BY department_id`
     );
-    return rows;
+    return rows.map(row => ({ ...row, department_id: Number(row.department_id) }));
   } catch (error) {
     throw new Error('Error fetching department mentor count: ' + error.message);
   }
