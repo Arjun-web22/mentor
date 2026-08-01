@@ -469,9 +469,10 @@ export const SuperAdminDashboard = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {dashboardData?.studentDistribution?.map((dept, idx) => {
-                const mentorCount = dashboardData.mentorDistribution?.find(m => m.department_id === dept.department_id)?.total_mentors || 0;
-                const cgpaData = dashboardData.cgpaChart?.find(c => c.department_id === dept.department_id)?.avg_cgpa;
-                const attendanceData = dashboardData.attendanceChart?.find(a => a.department_id === dept.department_id)?.avg_attendance;
+                const deptId = Number(dept.department_id);
+                const mentorCount = dashboardData.mentorDistribution?.find(m => Number(m.department_id) === deptId)?.total_mentors || 0;
+                const cgpaData = dashboardData.cgpaChart?.find(c => Number(c.department_id) === deptId)?.avg_cgpa;
+                const attendanceData = dashboardData.attendanceChart?.find(a => Number(a.department_id) === deptId)?.avg_attendance;
                 
                 return (
                   <tr key={dept.department_id} className={idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}>
@@ -510,9 +511,10 @@ export const SuperAdminDashboard = () => {
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
           {dashboardData?.studentDistribution?.map((dept, idx) => {
-            const mentorCount = dashboardData.mentorDistribution?.find(m => m.department_id === dept.department_id)?.total_mentors || 0;
-            const cgpaData = dashboardData.cgpaChart?.find(c => c.department_id === dept.department_id)?.avg_cgpa;
-            const attendanceData = dashboardData.attendanceChart?.find(a => a.department_id === dept.department_id)?.avg_attendance;
+            const deptId = Number(dept.department_id);
+            const mentorCount = dashboardData.mentorDistribution?.find(m => Number(m.department_id) === deptId)?.total_mentors || 0;
+            const cgpaData = dashboardData.cgpaChart?.find(c => Number(c.department_id) === deptId)?.avg_cgpa;
+            const attendanceData = dashboardData.attendanceChart?.find(a => Number(a.department_id) === deptId)?.avg_attendance;
             
             return (
               <div key={dept.department_id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>

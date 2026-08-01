@@ -59,7 +59,7 @@ const getDepartments = async (req, res) => {
     let filteredDepartments = departmentsWithStats;
     if (req.user.role === 'HOD' || req.user.role === 'MENTOR') {
       // HOD and MENTOR only see their own department
-      filteredDepartments = departmentsWithStats.filter(dept => dept.department_id === req.user.department_id);
+      filteredDepartments = departmentsWithStats.filter(dept => Number(dept.department_id) === Number(req.user.department_id));
     }
     // SUPER_ADMIN sees all departments in their college
     
@@ -90,7 +90,7 @@ const getMentorsByDepartmentController = async (req, res) => {
     // Role-based access control
     if (req.user.role === 'HOD' || req.user.role === 'MENTOR') {
       // HOD and MENTOR can only access their own department
-      if (parseInt(departmentId) !== req.user.department_id) {
+      if (parseInt(departmentId) !== Number(req.user.department_id)) {
         return res.status(403).json({
           success: false,
           message: 'Access denied. You can only view your own department.'

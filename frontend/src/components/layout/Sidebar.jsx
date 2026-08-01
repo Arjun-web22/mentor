@@ -84,7 +84,7 @@ export const Sidebar = ({ isOpen, onClose, isMobile }) => {
 
       <aside
         className={`
-          bg-white border-r border-gray-200 transition-all duration-300 flex flex-col z-20 min-w-0
+          bg-white border-r border-gray-200 transition-all duration-300 flex flex-col z-50 min-w-0
           ${collapsed ? 'w-20' : 'w-64'}
           ${isMobile
             ? `fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`

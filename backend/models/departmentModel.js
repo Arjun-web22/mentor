@@ -34,7 +34,11 @@ const fetchDepartments = async (collegeId = null) => {
     
     console.log("fetchDepartments - Result count:", rows.length);
     
-    return rows;
+    return rows.map(row => ({
+      ...row,
+      department_id: Number(row.department_id),
+      college_id: Number(row.college_id)
+    }));
   } catch (error) {
     console.error("fetchDepartments - Error:", error);
     console.error("fetchDepartments - Error stack:", error.stack);
