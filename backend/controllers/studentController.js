@@ -67,13 +67,8 @@ const getStudent = async (req, res) => {
   try {
     const { registerNo } = req.params;
 
-    console.log("========== AUTH DEBUG ==========");
-    console.log("JWT:", req.user);
-    console.log("Requested registerNo:", registerNo);
-
     // Validate registerNo
     if (!registerNo) {
-      console.log("403 REASON: Register number not provided");
       return res.status(400).json({
         success: false,
         message: 'Register number is required'
@@ -82,10 +77,8 @@ const getStudent = async (req, res) => {
 
     // Get student from database
     const student = await getStudentByRegisterNo(registerNo);
-    console.log("Student DB Result:", student);
 
     if (!student) {
-      console.log("403 REASON: Student not found");
       return res.status(404).json({
         success: false,
         message: 'Student not found'
@@ -93,51 +86,38 @@ const getStudent = async (req, res) => {
     }
 
     // Role-based access control
-    if (req.user.role === 'MENTOR') {
-      console.log("MENTOR Authorization Check");
-      console.log("Student.staff_id:", student.staff_id);
-      console.log("JWT staff_id:", req.user.staff_id);
-      console.log("Comparison result:", student.staff_id === req.user.staff_id);
-      
+    if (req.user.role === 'STUDENT') {
+      if (registerNo !== req.user.register_no) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only view your own information.'
+        });
+      }
+    } else if (req.user.role === 'MENTOR') {
       if (student.staff_id !== req.user.staff_id) {
-        console.log("403 REASON: Student not assigned to mentor");
         return res.status(403).json({
           success: false,
           message: 'Access denied. You can only view your own students.'
         });
       }
-      console.log("Authorization PASSED");
     } else if (req.user.role === 'HOD') {
-      console.log("HOD Authorization Check");
       const { fetchMentor } = require('../models/mentorModel');
       const mentor = await fetchMentor(student.staff_id);
-      console.log("Mentor DB Result:", mentor);
       
       if (!mentor) {
-        console.log("403 REASON: Mentor not found for student");
         return res.status(403).json({
           success: false,
           message: 'Access denied. You can only view students in your department.'
         });
       }
-      
-      console.log("mentor.department_id:", mentor.department_id);
-      console.log("req.user.department_id:", req.user.department_id);
-      console.log("Comparison result:", mentor.department_id === req.user.department_id);
       
       if (mentor.department_id !== req.user.department_id) {
-        console.log("403 REASON: Mentor belongs to different department");
         return res.status(403).json({
           success: false,
           message: 'Access denied. You can only view students in your department.'
         });
       }
-      console.log("Authorization PASSED");
-    } else if (req.user.role === 'SUPER_ADMIN') {
-      console.log("SUPER_ADMIN BYPASS - No checks required");
-      console.log("Authorization PASSED");
-    } else {
-      console.log("403 REASON: Invalid role");
+    } else if (req.user.role !== 'SUPER_ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Unknown role.'
@@ -145,6 +125,8 @@ const getStudent = async (req, res) => {
     }
 
     // Return success response
+    console.log("FINAL RESPONSE SENT TO CLIENT:");
+    console.dir(student, { depth: null });
     res.json({
       success: true,
       data: student
@@ -184,6 +166,39 @@ const updateStudentInfo = async (req, res) => {
       });
     }
 
+    // Get student from database for RBAC checks
+    const student = await getStudentByRegisterNo(registerNo);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    // Role-based access control
+    if (req.user.role === 'MENTOR') {
+      // MENTOR can only update their assigned students
+      if (student.staff_id !== req.user.staff_id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only update your own students.'
+        });
+      }
+    } else if (req.user.role === 'HOD') {
+      // HOD can only update students in their department
+      const { fetchMentor } = require('../models/mentorModel');
+      const mentor = await fetchMentor(student.staff_id);
+      
+      if (!mentor || mentor.department_id !== req.user.department_id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only update students in your department.'
+        });
+      }
+    }
+    // SUPER_ADMIN can update any student
+
     // Update student in database
     const updated = await updateStudent(registerNo, {
       student_name,
@@ -200,13 +215,13 @@ const updateStudentInfo = async (req, res) => {
     }
 
     // Get updated student data
-    const student = await getStudentByRegisterNo(registerNo);
+    const updatedStudent = await getStudentByRegisterNo(registerNo);
 
     // Return success response
     res.json({
       success: true,
       message: 'Student updated successfully',
-      data: student
+      data: updatedStudent
     });
   } catch (error) {
     console.error('Error in updateStudentInfo controller:', error);

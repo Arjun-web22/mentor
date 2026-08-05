@@ -51,19 +51,31 @@ const getStudentByRegisterNo = async (registerNo) => {
   try {
     const [rows] = await db.query(
       `SELECT 
-        course_degree,
-        year,
-        section,
-        register_no,
-        roll_no,
-        student_name,
-        staff_id,
-        staff_name,
-        cgpa,
-        attendance,
-        pending_arrears
-      FROM student 
-      WHERE register_no = ?`,
+        s.course_degree,
+        s.year,
+        s.section,
+        s.register_no,
+        s.roll_no,
+        s.student_name,
+        s.staff_id,
+        s.staff_name,
+        s.cgpa,
+        s.attendance,
+        s.pending_arrears,
+        s.dob,
+        s.gender,
+        s.batch,
+        s.email as college_email,
+        s.college_id,
+        u.profile_photo,
+        u.full_name as mentor_full_name,
+        u.phone as mentor_phone,
+        d.department_name,
+        d.abbreviation as department_abbreviation
+      FROM student s
+      LEFT JOIN users u ON s.staff_id = u.staff_id
+      LEFT JOIN departments d ON u.department_id = d.department_id
+      WHERE s.register_no = ?`,
       [registerNo]
     );
 
@@ -71,7 +83,54 @@ const getStudentByRegisterNo = async (registerNo) => {
       return null;
     }
 
-    return rows[0];
+    const student = rows[0];
+    
+    console.log("Student API Response (raw):", student);
+    
+    // Map field names to match frontend expectations
+    // Parse year and semester from the year field if it contains both (e.g., "UG Ist Year-A")
+    let year = student.year;
+    let semester = null;
+    
+    if (student.year && typeof student.year === 'string') {
+      // Try to extract semester from year field (format: "UG Ist Year-A")
+      const match = student.year.match(/-(\w+)$/);
+      if (match) {
+        semester = match[1];
+        // Remove the semester suffix from year
+        year = student.year.replace(/-\w+$/, '');
+      }
+    }
+    
+    const mappedStudent = {
+      name: student.student_name,
+      registerNo: student.register_no,
+      rollNo: student.roll_no,
+      courseDegree: student.course_degree,
+      year: year,
+      semester: semester || student.year, // Fallback to original year if parsing fails
+      section: student.section,
+      batch: student.batch,
+      dob: student.dob,
+      gender: student.gender,
+      collegeId: student.college_id,
+      staffId: student.staff_id,
+      staffName: student.staff_name,
+      departmentName: student.department_name || student.department_abbreviation || null,
+      departmentAbbreviation: student.department_abbreviation || null,
+      mentorName: student.staff_name || student.mentor_full_name || null,
+      mentorFullName: student.mentor_full_name || null,
+      email: student.college_email || null,
+      avatar: student.profile_photo || null,
+      attendancePercentage: student.attendance ? parseFloat(student.attendance) : 0,
+      pendingArrearsCount: student.pending_arrears ? parseInt(student.pending_arrears) : 0,
+      cgpa: student.cgpa ? parseFloat(student.cgpa) : 0,
+      phone: student.mentor_phone || null
+    };
+    
+    console.log("Student API Response (mapped):", mappedStudent);
+    
+    return mappedStudent;
   } catch (error) {
     console.error('Error in getStudentByRegisterNo model:', error);
     throw error;

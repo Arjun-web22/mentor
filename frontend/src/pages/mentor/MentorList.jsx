@@ -357,7 +357,7 @@ export const MentorList = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => navigate(`/mentors/${mentor.user_id}`)}
+                            onClick={() => navigate(`/mentors/${mentor.staff_id}`)}
                             className="px-3 py-1.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-lg transition-colors min-h-[36px]"
                           >
                             View Profile

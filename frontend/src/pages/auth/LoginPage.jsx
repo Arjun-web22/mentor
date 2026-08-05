@@ -88,6 +88,8 @@ export const LoginPage = () => {
           navigate('/departments');
         } else if (userRole === 'MENTOR') {
           navigate('/mentor');
+        } else if (userRole === 'STUDENT') {
+          navigate('/student');
         } else {
           navigate('/departments');
         }
@@ -129,6 +131,8 @@ export const LoginPage = () => {
           navigate('/departments');
         } else if (userRole === 'MENTOR') {
           navigate('/mentor');
+        } else if (userRole === 'STUDENT') {
+          navigate('/student');
         } else {
           navigate('/departments'); // Default fallback
         }
@@ -151,8 +155,8 @@ export const LoginPage = () => {
     <div className="min-h-screen bg-[#EEF3F8] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       {/* Institutional Top Header */}
       <div className="w-full max-w-md mx-auto text-center">
-        <div className="mx-auto w-16 h-16 bg-[#5B82C5] rounded-2xl flex items-center justify-center text-white shadow-lg text-2xl font-black tracking-wider mb-4 border-2 border-white">
-          FX
+        <div className="mx-auto w-19 h-16 bg-[#5B82C5] rounded-2xl flex items-center justify-center text-white shadow-lg text-2xl font-black tracking-wider mb-4 border-2 border-white">
+          FXEC
         </div>
         <h2 className="text-2xl font-black text-gray-900 tracking-tight">
           FRANCIS XAVIER ENGINEERING COLLEGE

@@ -295,7 +295,7 @@ export const MentorStudentsDirectory = () => {
 
                 {/* View Button */}
                 <button
-                  onClick={() => navigate(`/students/${student.register_no}`)}
+                  onClick={() => navigate(`/students/profile/${student.register_no}`)}
                   className="w-full mt-4 py-2 sm:py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs sm:text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 min-h-[40px]"
                 >
                   <EyeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -355,7 +355,7 @@ export const MentorStudentsDirectory = () => {
                       <td className="px-4 py-3 text-xs sm:text-sm font-bold text-[#5B82C5]">{student.staff_name}</td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => navigate(`/students/${student.register_no}`)}
+                          onClick={() => navigate(`/students/profile/${student.register_no}`)}
                           className="px-3 py-1.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
                         >
                           <EyeIcon className="w-3.5 h-3.5" />

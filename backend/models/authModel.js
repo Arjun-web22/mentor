@@ -111,7 +111,33 @@ const findUserByEmail = async (email) => {
   }
 };
 
+/**
+ * Find student by email (for Google OAuth)
+ * @param {string} email - Student email
+ * @returns {Promise<Object|null>} Student object if found, null otherwise
+ */
+const findStudentByEmail = async (email) => {
+  try {
+    // Query database for student
+    const [rows] = await db.query(
+      `SELECT register_no, student_name, email, college_id, staff_id, staff_name, course_degree, year, section 
+       FROM student WHERE email = ? LIMIT 1`,
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return rows[0];
+  } catch (error) {
+    console.error('Error in findStudentByEmail  model:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   login,
-  findUserByEmail
+  findUserByEmail,
+  findStudentByEmail
 };

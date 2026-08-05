@@ -41,6 +41,7 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
         'COLLEGE_ADMIN': '/college',
         'HOD': '/departments',
         'MENTOR': '/mentor',
+        'STUDENT': '/student',
       };
 
       const redirectPath = roleRedirects[userRole] || '/departments';

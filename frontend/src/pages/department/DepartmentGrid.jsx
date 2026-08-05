@@ -226,7 +226,12 @@ export const DepartmentGrid = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate(`/departments/${dept.department_id}/mentors?collegeId=${selectedCollege}`)}
+                    onClick={() => {
+                      console.log("========== DEPARTMENT GRID CLICK ==========");
+                      console.log("Clicked department_id:", dept.department_id);
+                      console.log("Navigating to:", `/departments/${dept.department_id}/mentors?collegeId=${selectedCollege}`);
+                      navigate(`/departments/${dept.department_id}/mentors?collegeId=${selectedCollege}`);
+                    }}
                     className="w-full py-2.5 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 mt-4 min-h-[44px]"
                   >
                     <span>Open Department Portal</span>
