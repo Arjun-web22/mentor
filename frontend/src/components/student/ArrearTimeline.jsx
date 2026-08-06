@@ -6,18 +6,18 @@ export const ArrearTimeline = ({ arrears }) => {
   const clearedCount = arrears.filter((a) => a.status === 'passed_arrear' || a.status === 'passed_first_attempt').length;
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+    <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-gray-100">
         <div>
-          <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-            <ClockIcon className="w-5 h-5 text-[#5B82C5]" /> Academic Arrear History & Backlog Timeline
+          <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+            <ClockIcon className="w-5 h-5 text-[#5B82C5] flex-shrink-0" /> Academic Arrear History & Backlog Timeline
           </h3>
           <p className="text-xs text-gray-500 mt-0.5 font-medium">
             Semester-wise record of examination attempts, re-examinations, and backlog statuses
           </p>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center flex-wrap gap-2">
           <span className="px-3 py-1 bg-emerald-50 text-[#4CAF50] border border-emerald-200 text-xs font-bold rounded-lg flex items-center gap-1">
             <CheckCircleIcon className="w-4 h-4" /> Cleared: {clearedCount}
           </span>

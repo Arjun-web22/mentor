@@ -415,11 +415,11 @@ export const StudentProfile = () => {
       </div>
 
       {/* 7. MENTOR COUNSELING HISTORY & ACTION PLANS */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#5B82C5]" /> Faculty Mentoring Counseling History
+            <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+              <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#5B82C5] flex-shrink-0" /> Faculty Mentoring Counseling History
             </h3>
             <p className="text-xs text-gray-500 font-medium">
               Recorded one-on-one counseling sessions, action plans, and parent correspondence
@@ -428,7 +428,7 @@ export const StudentProfile = () => {
 
           <button
             onClick={() => setIsCounselingModalOpen(true)}
-            className="px-3.5 py-2 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1"
+            className="w-full sm:w-auto px-3.5 py-2 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1 min-h-[44px]"
           >
             + Log New Session
           </button>
