@@ -161,7 +161,7 @@ export const Navbar = ({ onMenuToggle, isMobile }) => {
                         key={notif.id}
                         onClick={() => {
                           markNotificationAsRead(notif.id);
-                          if (notif.studentId) navigate(`/students/${notif.studentId}`);
+                          if (notif.studentId) navigate(`/students/profile/${notif.studentId}`);
                           setShowNotifications(false);
                         }}
                         className={`p-2.5 sm:p-3.5 hover:bg-gray-50 cursor-pointer transition-colors ${

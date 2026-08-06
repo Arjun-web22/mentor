@@ -54,6 +54,10 @@ const fetchDepartments = async (collegeId = null) => {
  */
 const fetchMentorsByDepartment = async (departmentId, collegeId = null) => {
   try {
+    console.log("========== BACKEND DEPARTMENT MODEL ==========");
+    console.log("fetchMentorsByDepartment - departmentId:", departmentId);
+    console.log("fetchMentorsByDepartment - collegeId:", collegeId);
+    
     let query, params;
     
     if (collegeId) {
@@ -106,7 +110,12 @@ const fetchMentorsByDepartment = async (departmentId, collegeId = null) => {
       params = [departmentId];
     }
     
+    console.log("fetchMentorsByDepartment - SQL params:", params);
+    
     const [rows] = await pool.query(query, params);
+    
+    console.log("fetchMentorsByDepartment - Result count:", rows.length);
+    console.log("fetchMentorsByDepartment - Sample mentor:", rows[0]);
     
     return rows;
   } catch (error) {

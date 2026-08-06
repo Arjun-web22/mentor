@@ -100,7 +100,7 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
         {/* Actions */}
         <div className="flex items-center space-x-2 pt-2">
           <button
-            onClick={() => navigate(`/students/${student.register_no}`)}
+            onClick={() => navigate(`/students/profile/${student.register_no}`)}
             className="flex-1 px-3 py-2 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
           >
             <EyeIcon className="w-4 h-4" /> View Profile
@@ -198,7 +198,7 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
                     <td className="academic-table-td text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <button
-                          onClick={() => navigate(`/students/${student.register_no}`)}
+                          onClick={() => navigate(`/students/profile/${student.register_no}`)}
                           className="px-3 py-1.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs min-h-[44px]"
                         >
                           <EyeIcon className="w-3.5 h-3.5" /> View Profile

@@ -47,7 +47,7 @@ const getAllMentorsController = async (req, res) => {
 const getMentorById = async (req, res) => {
   try {
     const { mentorId } = req.params;
-    
+
     // Role-based access control
     if (req.user.role === 'MENTOR') {
       // MENTOR can only view their own profile
@@ -68,16 +68,16 @@ const getMentorById = async (req, res) => {
       }
     }
     // SUPER_ADMIN can view any mentor
-    
+
     const mentor = await fetchMentor(mentorId);
-    
+
     if (!mentor) {
       return res.status(404).json({
         success: false,
         message: 'Mentor not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: mentor

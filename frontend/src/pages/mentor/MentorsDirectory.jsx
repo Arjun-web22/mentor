@@ -27,10 +27,15 @@ export const MentorsDirectory = () => {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState('cards');
 
+  console.log("========== MENTORS DIRECTORY MOUNT ==========");
+  console.log("URL departmentId:", departmentId);
+
   useEffect(() => {
     const fetchMentorsData = async () => {
       try {
         setLoading(true);
+        console.log("========== MENTORS DIRECTORY FETCH ==========");
+        console.log("Fetching mentors with departmentId:", departmentId);
         const data = await getMentorsByDepartment(departmentId);
         console.log("Mentors Data in MentorsDirectory:", data);
         setMentors(data);

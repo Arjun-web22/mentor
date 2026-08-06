@@ -26,11 +26,13 @@ const authenticate = (req, res, next) => {
     console.log("Decoded JWT:", decoded);
 
     // Attach user info from token to request
+    // Support both staff (userId) and student (register_no) payloads
     req.user = {
-      userId: decoded.userId,
+      userId: decoded.userId || null,
+      register_no: decoded.register_no || null,
       staff_id: decoded.staff_id,
       college_id: decoded.college_id,
-      department_id: decoded.department_id,
+      department_id: decoded.department_id || null,
       email: decoded.email,
       role: decoded.role
     };

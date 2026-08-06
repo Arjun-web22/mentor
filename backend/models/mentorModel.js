@@ -1,26 +1,49 @@
 const pool = require('../config/db');
 
 /**
- * Fetch mentor by staff_id
+ * Fetch mentor by staff_id with full details
  * @param {string} staffId - Mentor staff ID
  * @returns {Promise<Object|null>} Mentor object or null if not found
  */
 const fetchMentor = async (staffId) => {
   try {
     const [rows] = await pool.query(
-      `SELECT user_id, staff_id, full_name, designation, email, department_id 
-       FROM users 
-       WHERE staff_id = ?`,
+      `SELECT 
+        u.user_id,
+        u.staff_id,
+        u.full_name,
+        u.designation,
+        u.email,
+        u.phone,
+        u.department_id,
+        u.college_id,
+        u.role,
+        u.is_active,
+        u.profile_photo,
+        d.department_name,
+        c.college_name,
+        (SELECT COUNT(*) FROM student s WHERE s.staff_id = u.staff_id) AS total_students,
+        (SELECT AVG(s.cgpa) FROM student s WHERE s.staff_id = u.staff_id) AS avg_cgpa,
+        (SELECT AVG(s.attendance) FROM student s WHERE s.staff_id = u.staff_id) AS avg_attendance
+       FROM users u
+       LEFT JOIN departments d ON u.department_id = d.department_id
+       LEFT JOIN colleges c ON u.college_id = c.college_id
+       WHERE u.staff_id = ?`,
       [staffId]
     );
-    
+
     if (rows.length === 0) {
       return null;
     }
-    
-    return rows[0];
+
+    const mentor = rows[0];
+    return {
+      ...mentor,
+      employee_code: mentor.staff_id,
+      is_active: mentor.is_active === 1 || mentor.is_active === true
+    };
   } catch (error) {
-    throw new Error('Error fetching mentor: ' + error.message);
+   throw new Error('Error fetching mentor: ' + error.message);
   }
 };
 

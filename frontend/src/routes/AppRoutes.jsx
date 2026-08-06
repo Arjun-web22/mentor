@@ -13,12 +13,14 @@ import { CollegeManagement } from '../pages/college/CollegeManagement';
 import { DepartmentGrid } from '../pages/department/DepartmentGrid';
 import { MentorsDirectory } from '../pages/mentor/MentorsDirectory';
 import { MentorList } from '../pages/mentor/MentorList';
+import { MentorProfile } from '../pages/mentor/MentorProfile';
 import { MentorStudentsDirectory } from '../pages/student/MentorStudentsDirectory';
 import { StudentDetails } from '../pages/student/StudentDetails';
 import { MentorDashboard } from '../pages/mentor/MentorDashboard';
 import { HODDashboard } from '../pages/hod/HODDashboard';
 import { StudentList } from '../pages/student/StudentList';
 import { StudentProfile } from '../pages/student/StudentProfile';
+import { StudentDashboard } from '../pages/student/StudentDashboard';
 import { SystemSettings } from '../pages/settings/SystemSettings';
 
 const ProtectedLayout = ({ children }) => {
@@ -41,7 +43,6 @@ const ProtectedLayout = ({ children }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Close sidebar when route changes on mobile
   useEffect(() => {
     if (isMobile) {
       setIsSidebarOpen(false);
@@ -179,7 +180,17 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/students/:registerNo"
+        path="/students/profile/:id"
+        element={
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR', 'STUDENT']}>
+            <ProtectedLayout>
+              <StudentProfile />
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/students/details/:registerNo"
         element={
           <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
             <ProtectedLayout>
@@ -194,6 +205,16 @@ export const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['MENTOR']}>
             <ProtectedLayout>
               <MentorDashboard />
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student"
+        element={
+          <ProtectedRoute allowedRoles={['STUDENT']}>
+            <ProtectedLayout>
+              <StudentDashboard />
             </ProtectedLayout>
           </ProtectedRoute>
         }
@@ -219,6 +240,16 @@ export const AppRoutes = () => {
         }
       />
       <Route
+        path="/mentors/:mentorId"
+        element={
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+            <ProtectedLayout>
+              <MentorProfile />
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/students"
         element={
           <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
@@ -231,7 +262,7 @@ export const AppRoutes = () => {
       <Route
         path="/students/:id"
         element={
-          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR']}>
+          <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'COLLEGE_ADMIN', 'HOD', 'MENTOR', 'STUDENT']}>
             <ProtectedLayout>
               <StudentProfile />
             </ProtectedLayout>

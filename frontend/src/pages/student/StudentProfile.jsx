@@ -5,22 +5,29 @@ import { Badge } from '../../components/common/Badge';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { ArrearTimeline } from '../../components/student/ArrearTimeline';
 import { AddCounselingModal } from '../../components/student/AddCounselingModal';
+import StudentHero from '../../components/student/StudentHero';
+import StudentPersonalInfo from '../../components/student/StudentPersonalInfo';
+import StudentAcademicCard from '../../components/student/StudentAcademicCard';
+import StudentSkills from '../../components/student/StudentSkills';
+import StudentPlacementReadiness from '../../components/student/StudentPlacementReadiness';
+import StudentTimeline from '../../components/student/StudentTimeline';
+import { getPersonalInfo, updatePersonalInfo, getPSProgress, getCertifications, createCertification, deleteCertification } from '../../services/studentPortfolioService';
+import { getStudentByRegisterNo, getSkills, getCodingProfiles, getHackathons, getCounselingNotes } from '../../services/studentService';
+import { formatDate } from '../../utils/dateUtils';
 import {
-  UserIcon,
-  AcademicCapIcon,
   TrophyIcon,
-  ChartBarIcon,
   ChatBubbleLeftRightIcon,
   BriefcaseIcon,
   ExclamationTriangleIcon,
   ExclamationCircleIcon,
-  CheckCircleIcon,
-  CalendarIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  BuildingLibraryIcon,
   ArrowLeftIcon,
   CheckBadgeIcon,
+  XMarkIcon,
+  AcademicCapIcon,
+  PlusIcon,
+  CalendarDaysIcon,
+  LinkIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import {
   LineChart,
@@ -37,23 +44,108 @@ import {
 export const StudentProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getStudent } = useDashboard();
+  const { currentUser, addToast } = useDashboard();
 
   const [student, setStudent] = useState(null);
   const [loadingStudent, setLoadingStudent] = useState(true);
   const [isCounselingModalOpen, setIsCounselingModalOpen] = useState(false);
+  const [personalInfo, setPersonalInfo] = useState({});
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [personalInfoForm, setPersonalInfoForm] = useState({});
+  const [psProgress, setPsProgress] = useState({});
+  const [certifications, setCertifications] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const [codingProfiles, setCodingProfiles] = useState({});
+  const [hackathons, setHackathons] = useState([]);
+  const [counselingNotes, setCounselingNotes] = useState([]);
 
   useEffect(() => {
     if (id) {
       setLoadingStudent(true);
-      getStudent(id).then((st) => {
-        if (st) {
-          setStudent(st);
+      getStudentByRegisterNo(id).then((response) => {
+        if (response.success && response.data) {
+          setStudent(response.data);
         }
+        setLoadingStudent(false);
+      }).catch(() => {
         setLoadingStudent(false);
       });
     }
-  }, [id, getStudent]);
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getPersonalInfo(id).then((info) => {
+        setPersonalInfo(info || {});
+        setPersonalInfoForm(info || {});
+      }).catch(() => {
+        // Personal info might not exist yet, that's okay
+        setPersonalInfo({});
+        setPersonalInfoForm({});
+      });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getPSProgress(id).then((progress) => {
+        setPsProgress(progress || {});
+      }).catch(() => {
+        // PS progress might not exist yet, that's okay
+        setPsProgress({});
+      });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getCertifications(id).then((certs) => {
+        setCertifications(certs || []);
+      }).catch(() => {
+        // Certifications might not exist yet, that's okay
+      });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getSkills(id).then((response) => {
+        setSkills(response.data || []);
+      }).catch(() => {
+        setSkills([]);
+      });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getCodingProfiles(id).then((response) => {
+        setCodingProfiles(response.data || {});
+      }).catch(() => {
+        setCodingProfiles({});
+      });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getHackathons(id).then((response) => {
+        setHackathons(response.data || []);
+      }).catch(() => {
+        setHackathons([]);
+      });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      getCounselingNotes(id).then((response) => {
+        setCounselingNotes(response.data || []);
+      }).catch(() => {
+        setCounselingNotes([]);
+      });
+    }
+  }, [id]);
 
   if (loadingStudent) {
     return (
@@ -82,8 +174,54 @@ export const StudentProfile = () => {
     );
   }
 
-  // Current Semester GPA
-  const currentSemGpa = student.gpaHistory[student.gpaHistory.length - 1]?.gpa || student.cgpa;
+  const handlePersonalInfoSave = async () => {
+    try {
+      const response = await updatePersonalInfo(id, personalInfoForm);
+      setPersonalInfo(response);
+      setPersonalInfoForm(response);
+      setIsEditingPersonalInfo(false);
+      addToast('success', 'Profile Updated', 'Personal information updated successfully');
+    } catch (error) {
+      console.error('Error updating personal info:', error);
+      addToast('error', 'Update Failed', error.response?.data?.message || 'Failed to update personal information');
+    }
+  };
+
+  const handlePersonalInfoCancel = () => {
+    setPersonalInfoForm(personalInfo || {});
+    setIsEditingPersonalInfo(false);
+  };
+
+  const currentSemGpa = (student?.gpaHistory && student?.gpaHistory.length > 0) ? student?.gpaHistory[student?.gpaHistory.length - 1]?.gpa : Number(student?.cgpa || 0);
+
+  // Calculate CGPA badge
+  const cgpaBadge = {
+    color: Number(student?.cgpa || 0) >= 8 ? 'bg-emerald-100 text-emerald-700 border-emerald-300' :
+           Number(student?.cgpa || 0) >= 7 ? 'bg-blue-100 text-blue-700 border-blue-300' :
+           Number(student?.cgpa || 0) >= 6 ? 'bg-amber-100 text-amber-700 border-amber-300' :
+           'bg-red-100 text-red-700 border-red-300',
+    text: Number(student?.cgpa || 0) >= 8 ? 'Excellent' :
+          Number(student?.cgpa || 0) >= 7 ? 'Good' :
+          Number(student?.cgpa || 0) >= 6 ? 'Average' :
+          'Needs Improvement'
+  };
+
+  // Calculate PS completion percentage
+  const psCompletion = psProgress ? Math.round(
+    ((psProgress.c_level || 0) + (psProgress.java_level || 0) + (psProgress.python_level || 0) + 
+     (psProgress.cpp_level || 0) + (psProgress.database_level || 0) + (psProgress.aptitude_level || 0)) / 6 * 100
+  ) : 0;
+
+  // Calculate placement readiness score
+  const placementReadiness = Math.round(
+    (Number(student?.cgpa || 0) / 10 * 30) +
+    (Number(student?.attendancePercentage || 0) / 100 * 20) +
+    (psCompletion / 100 * 20) +
+    ((student?.pendingArrearsCount || 0) === 0 ? 10 : 0) +
+    (hackathons.length >= 3 ? 10 : hackathons.length * 3) +
+    (certifications.length >= 3 ? 10 : certifications.length * 3) +
+    (codingProfiles?.github ? 10 : 0)
+  );
 
   return (
     <div className="space-y-6 overflow-x-hidden">
@@ -110,90 +248,26 @@ export const StudentProfile = () => {
       </div>
 
       {/* 1. TOP HEADER PROFILE CARD */}
-      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs overflow-hidden">
-        <div className="flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-6">
-          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-5 w-full sm:w-auto">
-            <img
-              src={student.avatar}
-              alt={student.name}
-              className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl object-cover border-4 border-[#5B82C5]/20 shadow-xs flex-shrink-0 max-w-full h-auto"
-            />
-            <div className="text-center sm:text-left flex-1 min-w-0">
-              <div className="flex flex-col lg:flex-row items-center lg:items-start space-x-0 lg:space-x-3 space-y-2 lg:space-y-0">
-                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">{student.name}</h1>
-                <Badge variant={student.pendingArrearsCount === 0 ? 'success' : 'danger'}>
-                  {student.pendingArrearsCount === 0 ? 'Regular Passing' : `${student.pendingArrearsCount} Backlogs`}
-                </Badge>
-              </div>
-
-              <p className="text-xs font-bold text-gray-500 font-mono">
-                REGISTER NO: {student.registerNo} • {student.departmentName}
-              </p>
-
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-xs font-semibold text-gray-600">
-                <div className="flex items-center gap-1">
-                  <EnvelopeIcon className="w-4 h-4 text-[#5B82C5]" /> {student.email}
-                </div>
-                <div className="flex items-center gap-1">
-                  <PhoneIcon className="w-4 h-4 text-[#5B82C5]" /> {student.phone}
-                </div>
-                <div className="flex items-center gap-1">
-                  <BuildingLibraryIcon className="w-4 h-4 text-[#5B82C5]" /> Year {student.year} (Sem {student.semester}-{student.section})
-                </div>
-              </div>
-
-              <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-center sm:justify-start space-x-2 text-xs font-semibold text-gray-700">
-                <span className="text-gray-400">Assigned Faculty Mentor:</span>
-                <span className="font-extrabold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-md border border-gray-200">
-                  {student.mentorName}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Academic Highlights Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            <div className="bg-[#EBF1FA] p-3 rounded-xl border border-[#5B82C5]/30 text-center flex-1">
-              <span className="text-[10px] font-bold text-[#5B82C5] uppercase block">Overall CGPA</span>
-              <span className="text-xl font-black text-[#5B82C5]">{student.cgpa.toFixed(2)}</span>
-            </div>
-
-            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-center flex-1">
-              <span className="text-[10px] font-bold text-emerald-700 uppercase block">Attendance</span>
-              <span className="text-xl font-black text-emerald-800">{student.attendancePercentage}%</span>
-            </div>
-
-            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-center flex-1">
-              <span className="text-[10px] font-bold text-amber-700 uppercase block">Dept Rank</span>
-              <span className="text-xl font-black text-amber-900">#{student.departmentRank}</span>
-            </div>
-
-            <div className="bg-sky-50 p-3 rounded-xl border border-sky-200 text-center flex-1">
-              <span className="text-[10px] font-bold text-sky-700 uppercase block">College Rank</span>
-              <span className="text-xl font-black text-sky-900">#{student.collegeRank}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudentHero student={student} personalInfo={personalInfo} cgpaBadge={cgpaBadge} psCompletion={psCompletion} />
 
       {/* 2. WARNING NOTIFICATIONS BANNER (IF ANY) */}
-      {(student.pendingArrearsCount > 0 || student.attendancePercentage < 75 || student.cgpa < 7.0) && (
+      {(student?.pendingArrearsCount > 0 || Number(student?.attendancePercentage || 0) < 75 || Number(student?.cgpa || 0) < 7.0) && (
         <div className="bg-red-50 p-4 rounded-xl border border-red-200 space-y-2">
           <h4 className="text-xs font-black text-red-900 uppercase tracking-wider flex items-center gap-1.5">
             <ExclamationTriangleIcon className="w-4 h-4 text-[#F44336]" /> Academic Intervention Required
           </h4>
           <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-red-800">
-            {student.pendingArrearsCount > 0 && (
+            {student?.pendingArrearsCount > 0 && (
               <span className="px-2.5 py-1 bg-red-100 rounded-lg border border-red-300">
-                • {student.pendingArrearsCount} Pending Arrears Pending Clearing
+                • {student?.pendingArrearsCount} Pending Arrears Pending Clearing
               </span>
             )}
-            {student.attendancePercentage < 75 && (
+            {Number(student?.attendancePercentage || 0) < 75 && (
               <span className="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-lg border border-amber-300">
-                • Low Attendance ({student.attendancePercentage}% - Below 75% Cutoff)
+                • Low Attendance ({Number(student?.attendancePercentage || 0)}% - Below 75% Cutoff)
               </span>
             )}
-            {student.cgpa < 7.0 && (
+            {Number(student?.cgpa || 0) < 7.0 && (
               <span className="px-2.5 py-1 bg-red-100 rounded-lg border border-red-300">
                 • CGPA below 7.00 threshold
               </span>
@@ -202,14 +276,148 @@ export const StudentProfile = () => {
         </div>
       )}
 
-      {/* 3. RANKINGS SECTION (Cards) */}
+      {/* 3. PERSONAL INFORMATION */}
+      <StudentPersonalInfo
+        personalInfo={personalInfo}
+        personalInfoForm={personalInfoForm}
+        isEditingPersonalInfo={isEditingPersonalInfo}
+        setIsEditingPersonalInfo={setIsEditingPersonalInfo}
+        setPersonalInfoForm={setPersonalInfoForm}
+        handlePersonalInfoSave={handlePersonalInfoSave}
+        handlePersonalInfoCancel={handlePersonalInfoCancel}
+        canEdit={currentUser?.role === 'STUDENT' && currentUser?.register_no === id}
+      />
+
+      {/* Academic Information Section */}
+      <StudentAcademicCard student={student} />
+
+      {/* Technical Skills Section */}
+      <StudentSkills skills={skills} />
+
+      {/* 4. PS PORTAL PROGRESS */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 mb-4">
+          <AcademicCapIcon className="w-5 h-5 text-[#5B82C5]" /> PS Portal Progress
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[
+            { name: 'C', level: psProgress?.c_level || 0, completed: psProgress?.c_completed_date, verifiedBy: psProgress?.c_verified_by },
+            { name: 'Java', level: psProgress?.java_level || 0, completed: psProgress?.java_completed_date, verifiedBy: psProgress?.java_verified_by },
+            { name: 'Python', level: psProgress?.python_level || 0, completed: psProgress?.python_completed_date, verifiedBy: psProgress?.python_verified_by },
+            { name: 'C++', level: psProgress?.cpp_level || 0, completed: psProgress?.cpp_completed_date, verifiedBy: psProgress?.cpp_verified_by },
+            { name: 'Database', level: psProgress?.database_level || 0, completed: psProgress?.database_completed_date, verifiedBy: psProgress?.database_verified_by },
+            { name: 'Aptitude', level: psProgress?.aptitude_level || 0, completed: psProgress?.aptitude_completed_date, verifiedBy: psProgress?.aptitude_verified_by },
+          ].map((item) => (
+            <div key={item.name} className="bg-[#EBF1FA] p-3 rounded-xl border border-[#5B82C5]/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-[#5B82C5] uppercase">{item.name}</span>
+                <span className="text-lg font-black text-[#5B82C5]">Level {item.level}</span>
+              </div>
+              {item.completed && (
+                <div className="mt-2 pt-2 border-t border-[#5B82C5]/20">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-600">
+                    <CheckCircleIcon className="w-3 h-3 text-green-600" />
+                    <span className="font-semibold">Completed: {formatDate(item.completed)}</span>
+                  </div>
+                  {item.verifiedBy && (
+                    <div className="text-[10px] text-gray-500 mt-1">
+                      <span className="font-medium">Verified by:</span> {item.verifiedBy}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 5. CERTIFICATIONS */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#5B82C5]/10 rounded-xl flex items-center justify-center">
+              <AcademicCapIcon className="w-5 h-5 text-[#5B82C5]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-gray-900">Certifications</h3>
+              <p className="text-xs font-semibold text-gray-500">Your professional certifications</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full border border-emerald-300">
+              {(certifications || []).filter(c => c.status === 'Approved').length} Approved
+            </span>
+            <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full border border-amber-300">
+              {(certifications || []).filter(c => c.status === 'Pending').length} Pending
+            </span>
+            <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full border border-red-300">
+              {(certifications || []).filter(c => c.status === 'Rejected').length} Rejected
+            </span>
+          </div>
+        </div>
+        
+        {(certifications || []).length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
+            <AcademicCapIcon className="w-16 h-16 mx-auto mb-3 text-gray-300" />
+            <p className="text-sm font-semibold text-gray-500">No certifications added yet</p>
+            <button className="mt-4 px-4 py-2 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-all flex items-center gap-2 mx-auto">
+              <PlusIcon className="w-4 h-4" /> Add Certification
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(certifications || []).map((cert) => (
+              <div key={cert.id} className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h4 className="text-sm font-extrabold text-gray-900 mb-1">{cert.certificate_name || cert.name || 'Certification'}</h4>
+                    <p className="text-xs font-semibold text-gray-500">{cert.issuer || 'Unknown Issuer'}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-[10px] font-bold rounded-full border ${
+                    cert.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 border-emerald-300' :
+                    cert.status === 'Pending' ? 'bg-amber-100 text-amber-700 border-amber-300' :
+                    cert.status === 'Rejected' ? 'bg-red-100 text-red-700 border-red-300' :
+                    'bg-gray-100 text-gray-700 border-gray-300'
+                  }`}>
+                    {cert.status?.toUpperCase() || 'UNKNOWN'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                  <CalendarDaysIcon className="w-3 h-3" />
+                  <span>{formatDate(cert.issue_date || cert.issueDate)}</span>
+                </div>
+                <div className="flex gap-2">
+                  {cert.credential_url && (
+                    <a href={cert.credential_url} target="_blank" rel="noopener noreferrer" className="flex-1 px-3 py-2 bg-[#5B82C5] text-white text-xs font-bold rounded-lg hover:bg-[#4A6FA8] transition-all flex items-center justify-center gap-1">
+                      <LinkIcon className="w-3 h-3" /> View
+                    </a>
+                  )}
+                  {cert.status === 'Pending' && (
+                    <button onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this certification?')) {
+                        deleteCertification(id, cert.id).then(() => {
+                          setCertifications((certifications || []).filter(c => c.id !== cert.id));
+                        }).catch(console.error);
+                      }
+                    }} className="px-3 py-2 bg-red-100 text-red-700 text-xs font-bold rounded-lg hover:bg-red-200 transition-all flex items-center justify-center gap-1">
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 6. RANKINGS SECTION (Cards) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase">
             <span>College Rank</span>
             <TrophyIcon className="w-4 h-4 text-[#5B82C5]" />
           </div>
-          <p className="text-2xl font-black text-gray-900 mt-2">#{student.collegeRank}</p>
+          <p className="text-2xl font-black text-gray-900 mt-2">#{student?.collegeRank || '—'}</p>
           <p className="text-[11px] text-gray-500 font-medium">Out of 2,850 Students</p>
         </div>
 
@@ -218,8 +426,8 @@ export const StudentProfile = () => {
             <span>Dept Rank</span>
             <TrophyIcon className="w-4 h-4 text-[#4CAF50]" />
           </div>
-          <p className="text-2xl font-black text-gray-900 mt-2">#{student.departmentRank}</p>
-          <p className="text-[11px] text-gray-500 font-medium">Out of {student.departmentName.split(' ')[0]} 120 Batch</p>
+          <p className="text-2xl font-black text-gray-900 mt-2">#{student?.departmentRank || '—'}</p>
+          <p className="text-[11px] text-gray-500 font-medium">Out of {(student?.departmentName || '').split(' ')[0]} 120 Batch</p>
         </div>
 
         <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
@@ -227,8 +435,8 @@ export const StudentProfile = () => {
             <span>Class Rank</span>
             <TrophyIcon className="w-4 h-4 text-[#FF9800]" />
           </div>
-          <p className="text-2xl font-black text-gray-900 mt-2">#{student.classRank}</p>
-          <p className="text-[11px] text-gray-500 font-medium">Section {student.section} (60 Students)</p>
+          <p className="text-2xl font-black text-gray-900 mt-2">#{student?.classRank || '—'}</p>
+          <p className="text-[11px] text-gray-500 font-medium">Section {student?.section || '—'} (60 Students)</p>
         </div>
 
         <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-xs">
@@ -236,7 +444,7 @@ export const StudentProfile = () => {
             <span>Batch Rank</span>
             <TrophyIcon className="w-4 h-4 text-sky-600" />
           </div>
-          <p className="text-2xl font-black text-gray-900 mt-2">#{student.batchRank}</p>
+          <p className="text-2xl font-black text-gray-900 mt-2">#{student?.batchRank || '—'}</p>
           <p className="text-[11px] text-gray-500 font-medium">2022-2026 Batch</p>
         </div>
 
@@ -245,12 +453,12 @@ export const StudentProfile = () => {
             <span>Percentile</span>
             <CheckBadgeIcon className="w-4 h-4 text-purple-600" />
           </div>
-          <p className="text-2xl font-black text-gray-900 mt-2">{student.percentile}%</p>
+          <p className="text-2xl font-black text-gray-900 mt-2">{student?.percentile || '—'}%</p>
           <p className="text-[11px] text-gray-500 font-medium">Academic Standing</p>
         </div>
       </div>
 
-      {/* 4. PERFORMANCE ANALYTICS & GPA GROWTH CHART */}
+      {/* 5. PERFORMANCE ANALYTICS & GPA GROWTH CHART */}
       <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 gap-2">
           <div>
@@ -276,7 +484,7 @@ export const StudentProfile = () => {
 
         <div className="h-56 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={student.gpaHistory} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <LineChart data={student?.gpaHistory || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
               <XAxis
                 dataKey="semester"
@@ -312,170 +520,28 @@ export const StudentProfile = () => {
           </ResponsiveContainer>
         </div>
       </div>
+{/* 5. ARREAR TIMELINE SECTION */}
+<ArrearTimeline arrears={student?.arrearsHistory || []} />
 
-      {/* 5. ARREAR TIMELINE SECTION */}
-      <ArrearTimeline arrears={student.arrearsHistory} />
+{/* Placement Readiness Section */}
+<StudentPlacementReadiness
+  student={student}
+  psCompletion={psCompletion}
+  hackathons={hackathons}
+  certifications={certifications}
+  codingProfiles={codingProfiles}
+  placementReadiness={placementReadiness}
+/>
 
-      {/* 6. PLACEMENT READINESS & INTERVIEW SCORE */}
-      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4 sm:space-y-6">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-gray-100">
-          <div>
-            <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <BriefcaseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#5B82C5]" /> Placement Readiness & Technical Portfolio
-            </h3>
-            <p className="text-xs text-gray-500 font-medium">
-              Industry certifications, skill matrix, internships, and campus placement standing
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 p-2 sm:p-2.5 rounded-xl border border-gray-200">
-            <span className="text-xs font-bold text-gray-600">Interview Readiness Score:</span>
-            <span
-              className={`text-sm font-black px-2 sm:px-3 py-1 rounded-lg border ${
-                student.interviewReadinessScore >= 80
-                  ? 'bg-emerald-50 text-[#4CAF50] border-emerald-200'
-                  : 'bg-amber-50 text-[#FF9800] border-amber-200'
-              }`}
-            >
-              {student.interviewReadinessScore} / 100
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* Skills & Certifications */}
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-xs font-black text-gray-700 uppercase tracking-wider mb-2">Technical Skill Matrix</h4>
-              <div className="flex flex-wrap gap-2">
-                {student.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="px-3 py-1 bg-[#EBF1FA] text-[#5B82C5] text-xs font-bold rounded-lg border border-[#5B82C5]/30"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-black text-gray-700 uppercase tracking-wider mb-2">
-                Verified Certifications ({student.certifications.length})
-              </h4>
-              <div className="space-y-1.5">
-                {student.certifications.map((cert) => (
-                  <div
-                    key={cert}
-                    className="p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-xs font-bold text-gray-800 flex items-center gap-2"
-                  >
-                    <CheckCircleIcon className="w-4 h-4 text-[#4CAF50] flex-shrink-0" />
-                    <span>{cert}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Projects & Internships */}
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-xs font-black text-gray-700 uppercase tracking-wider mb-2">Academic & Capstone Projects</h4>
-              <div className="space-y-2">
-                {student.projects.map((proj) => (
-                  <div key={proj.title} className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <h5 className="text-xs font-extrabold text-gray-900">{proj.title}</h5>
-                      <span className="text-[10px] font-bold text-[#5B82C5] bg-[#EBF1FA] px-2 py-0.5 rounded">
-                        {proj.tech}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1 font-medium leading-snug">{proj.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {student.internships.length > 0 && (
-              <div>
-                <h4 className="text-xs font-black text-gray-700 uppercase tracking-wider mb-2">Industry Internships</h4>
-                {student.internships.map((intern) => (
-                  <div key={intern.company} className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 text-xs">
-                    <div className="flex items-center justify-between font-bold text-emerald-900">
-                      <span>{intern.company}</span>
-                      <span className="text-[11px] text-emerald-700">{intern.duration}</span>
-                    </div>
-                    <p className="text-emerald-800 mt-0.5 font-medium">{intern.role}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 7. MENTOR COUNSELING HISTORY & ACTION PLANS */}
-      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
-          <div>
-            <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#5B82C5] flex-shrink-0" /> Faculty Mentoring Counseling History
-            </h3>
-            <p className="text-xs text-gray-500 font-medium">
-              Recorded one-on-one counseling sessions, action plans, and parent correspondence
-            </p>
-          </div>
-
-          <button
-            onClick={() => setIsCounselingModalOpen(true)}
-            className="w-full sm:w-auto px-3.5 py-2 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1 min-h-[44px]"
-          >
-            + Log New Session
-          </button>
-        </div>
-
-        {student.counselingNotes.length === 0 ? (
-          <div className="py-8 text-center bg-gray-50 rounded-xl border border-gray-200 text-gray-500 font-medium text-xs">
-            No formal counseling sessions logged yet. Click "+ Log New Session" to create the first record.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {student.counselingNotes.map((note) => (
-              <div key={note.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-2">
-                <div className="flex flex-wrap items-center justify-between text-xs font-bold">
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2.5 py-1 bg-[#EBF1FA] text-[#5B82C5] rounded-lg border border-[#5B82C5]/30">
-                      {note.category} Counseling
-                    </span>
-                    <span className="text-gray-900">Recorded by: {note.mentorName}</span>
-                  </div>
-                  <span className="text-gray-500 font-mono">Date: {note.date}</span>
-                </div>
-
-                <p className="text-xs text-gray-800 font-medium leading-relaxed bg-white p-3 rounded-lg border border-gray-200">
-                  <strong className="text-gray-900">Discussion Notes:</strong> {note.note}
-                </p>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-1">
-                  <span className="text-[#4CAF50] font-bold">
-                    Action Plan: {note.actionPlan}
-                  </span>
-                  <span className="text-gray-500 font-bold flex items-center gap-1">
-                    <CalendarIcon className="w-3.5 h-3.5" /> Next Follow-up: {note.followUpDate}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
+{/* Counselling History */}
+<StudentTimeline counselingNotes={counselingNotes} />
+  
       {/* Counseling Modal */}
       <AddCounselingModal
         isOpen={isCounselingModalOpen}
         onClose={() => setIsCounselingModalOpen(false)}
-        studentId={student.id}
-        studentName={student.name}
+        studentId={student?.id}
+        studentName={student?.name}
       />
     </div>
   );
