@@ -402,7 +402,7 @@ export const SuperAdminDashboard = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden xl:block">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200">
@@ -437,24 +437,46 @@ export const SuperAdminDashboard = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="xl:hidden space-y-3">
+          {(!dashboardData?.topMentors || dashboardData.topMentors.length === 0) ? (
+            <div className="text-center text-gray-500 py-8">No mentor data available</div>
+          ) : (
+            dashboardData.topMentors.map((mentor, idx) => (
+              <div key={mentor.staff_id} className={`rounded-xl p-4 border border-gray-200 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-extrabold text-gray-900">#{idx + 1} • {mentor.full_name}</span>
+                  <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-xs flex-shrink-0">
+                    {Number(mentor.avg_cgpa || 0).toFixed(2)} CGPA
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
+                  <span>Staff ID: {mentor.staff_id}</span>
+                  <span>{Number(mentor.total_students || 0)} Students</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Department Performance Leaderboard Table */}
       <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-xs overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <div>
             <h3 className="text-base font-extrabold text-gray-900">Department Performance Leaderboard</h3>
             <p className="text-xs text-gray-500 font-medium">Comprehensive academic metrics across all departments</p>
           </div>
           <button
             onClick={() => navigate('/departments')}
-            className="text-xs font-bold text-[#5B82C5] hover:underline"
+            className="text-xs font-bold text-[#5B82C5] hover:underline text-left sm:text-right"
           >
             View Department Cards →
           </button>
         </div>
 
-        <div className="overflow-x-auto hidden md:block">
+        <div className="overflow-x-auto hidden xl:block">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200">
@@ -509,7 +531,7 @@ export const SuperAdminDashboard = () => {
         </div>
 
         {/* Mobile Card View */}
-        <div className="md:hidden space-y-4">
+        <div className="xl:hidden space-y-4">
           {dashboardData?.studentDistribution?.map((dept, idx) => {
             const deptId = Number(dept.department_id);
             const mentorCount = dashboardData.mentorDistribution?.find(m => Number(m.department_id) === deptId)?.total_mentors || 0;

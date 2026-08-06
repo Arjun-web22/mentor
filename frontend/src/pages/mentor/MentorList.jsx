@@ -260,7 +260,7 @@ export const MentorList = () => {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto hidden md:block">
+        <div className="overflow-x-auto hidden xl:block">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -379,7 +379,7 @@ export const MentorList = () => {
         </div>
 
         {/* Mobile Card View */}
-        <div className="md:hidden space-y-3 p-4">
+        <div className="xl:hidden space-y-3 p-4">
           {paginatedMentors.length === 0 ? (
             <div className="text-center py-8 text-gray-500 font-medium">
               No mentor records matched the active filter criteria.

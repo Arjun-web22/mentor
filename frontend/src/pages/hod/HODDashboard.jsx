@@ -187,7 +187,7 @@ export const HODDashboard = () => {
       {/* Mentor Performance */}
       <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-xs">
         <h3 className="text-sm font-black text-gray-900 mb-4">Mentor Performance</h3>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden xl:block">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -213,6 +213,38 @@ export const HODDashboard = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="xl:hidden space-y-3">
+          {mentor_performance.length === 0 ? (
+            <div className="text-center text-gray-500 py-8 text-xs font-medium">No mentor data available</div>
+          ) : (
+            mentor_performance.map((mentor) => (
+              <div key={mentor.staff_id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <p className="text-sm font-bold text-gray-900">{mentor.full_name}</p>
+                <p className="text-[10px] text-gray-500 mb-2">{mentor.designation}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-white p-2 rounded-lg border border-gray-200">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Students</span>
+                    <span className="text-sm font-black text-gray-900">{mentor.total_students}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-gray-200">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Avg CGPA</span>
+                    <span className="text-sm font-black text-gray-900">{Number(mentor.avg_cgpa || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-gray-200">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Avg Attendance</span>
+                    <span className="text-sm font-black text-gray-900">{Number(mentor.avg_attendance || 0).toFixed(2)}%</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-gray-200">
+                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Arrears</span>
+                    <span className="text-sm font-black text-gray-900">{mentor.total_arrears || 0}</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

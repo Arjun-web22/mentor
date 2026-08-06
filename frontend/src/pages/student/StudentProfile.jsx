@@ -152,7 +152,7 @@ export const StudentProfile = () => {
           </div>
 
           {/* Academic Highlights Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full lg:w-auto">
             <div className="bg-[#EBF1FA] p-3 rounded-xl border border-[#5B82C5]/30 text-center flex-1">
               <span className="text-[10px] font-bold text-[#5B82C5] uppercase block">Overall CGPA</span>
               <span className="text-xl font-black text-[#5B82C5]">{student.cgpa.toFixed(2)}</span>

@@ -139,7 +139,7 @@ export const CollegeManagement = () => {
       {/* Searchable Colleges Table */}
       {!loading && !error && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-          <div className="overflow-x-auto hidden md:block">
+          <div className="overflow-x-auto hidden xl:block">
             <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200">
@@ -203,7 +203,7 @@ export const CollegeManagement = () => {
           </div>
 
           {/* Mobile Card View */}
-          <div className="md:hidden space-y-4 p-4">
+          <div className="xl:hidden space-y-4 p-4">
             {filteredColleges.map((col, idx) => (
               <div key={col.college_id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
                 <div className="flex items-center space-x-3 mb-3">
