@@ -27,10 +27,17 @@ export const CollegeManagement = () => {
   useEffect(() => {
     const fetchCollegesData = async () => {
       try {
+        console.log("========== COLLEGE MANAGEMENT MOUNT ==========");
         setLoading(true);
+        console.log("Calling getAllColleges API...");
         const response = await getAllColleges();
+        console.log("API Response before setColleges:", response);
         if (response.success) {
+          console.log("Setting colleges state with data:", response.data);
           setColleges(response.data);
+          console.log("setColleges called - state will update on next render");
+        } else {
+          console.error("API returned success=false:", response);
         }
         setError(null);
       } catch (err) {
@@ -43,6 +50,12 @@ export const CollegeManagement = () => {
 
     fetchCollegesData();
   }, []);
+
+  useEffect(() => {
+    console.log("========== COLLEGES STATE UPDATED ==========");
+    console.log("colleges state:", colleges);
+    console.log("colleges.length:", colleges.length);
+  }, [colleges]);
 
   const filteredColleges = colleges.filter((col) => {
     const matchesSearch =
@@ -155,7 +168,17 @@ export const CollegeManagement = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredColleges.map((col, idx) => (
+              {filteredColleges.map((col, idx) => {
+                console.log("========== RENDERING COLLEGE ROW ==========");
+                console.log({
+                  college_name: col.college_name,
+                  college_code: col.college_code,
+                  location: col.location,
+                  department_count: col.department_count,
+                  student_count: col.student_count,
+                  mentor_count: col.mentor_count
+                });
+                return (
                 <tr
                   key={col.college_id}
                   onClick={() => navigate('/departments')}
@@ -197,14 +220,16 @@ export const CollegeManagement = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
           </div>
 
           {/* Mobile Card View */}
           <div className="xl:hidden space-y-4 p-4">
-            {filteredColleges.map((col, idx) => (
+            {filteredColleges.map((col, idx) => {
+              return (
               <div key={col.college_id} className={`bg-white rounded-xl p-4 border border-gray-200 shadow-xs ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
                 <div className="flex items-center space-x-3 mb-3">
                   <span className="w-10 h-10 rounded-lg bg-[#5B82C5] text-white font-bold flex items-center justify-center text-sm flex-shrink-0">
@@ -247,7 +272,8 @@ export const CollegeManagement = () => {
                   <ArrowRightIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

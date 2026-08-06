@@ -6,31 +6,24 @@ const db = require('../config/db');
  */
 const getAllColleges = async () => {
   try {
+    console.log("========== BACKEND MODEL getAllColleges ==========");
     const [rows] = await db.query(
-      `SELECT DISTINCT college_id 
-       FROM users 
-       WHERE college_id IS NOT NULL`
+      `SELECT college_id, college_code, college_name, location 
+       FROM colleges 
+       ORDER BY college_name`
     );
     
-    // Map college IDs to college details
-    const colleges = rows.map(row => {
-      if (row.college_id === 1) {
-        return {
-          college_id: 1,
-          college_name: 'Francis Xavier Engineering College',
-          college_code: 'FXEC',
-          location: 'Tirunelveli, Tamil Nadu'
-        };
-      }
-      return {
-        college_id: row.college_id,
-        college_name: `College ${row.college_id}`,
-        college_code: `COL${row.college_id}`,
-        location: 'Location TBD'
-      };
-    });
+    console.log("SQL Result from colleges table:", rows);
     
-    return colleges;
+    const mapped = rows.map(row => ({
+      college_id: row.college_id,
+      college_code: row.college_code,
+      college_name: row.college_name,
+      location: row.location || 'Location TBD'
+    }));
+    
+    console.log("Mapped colleges result:", mapped);
+    return mapped;
   } catch (error) {
     console.error('Error in getAllColleges model:', error);
     throw error;
@@ -44,32 +37,39 @@ const getAllColleges = async () => {
  */
 const getCollegeStats = async (collegeId) => {
   try {
+    console.log(`========== BACKEND MODEL getCollegeStats for college_id ${collegeId} ==========`);
+
     const [deptRows] = await db.query(
-      `SELECT COUNT(DISTINCT department_id) as department_count 
-       FROM users 
+      `SELECT COUNT(*) as department_count 
+       FROM departments 
        WHERE college_id = ?`,
       [collegeId]
     );
-    
+    console.log("Department count SQL result:", deptRows[0]);
+
     const [studentRows] = await db.query(
       `SELECT COUNT(*) as student_count 
        FROM student 
        WHERE college_id = ?`,
       [collegeId]
     );
-    
+    console.log("Student count SQL result:", studentRows[0]);
+
     const [mentorRows] = await db.query(
       `SELECT COUNT(*) as mentor_count 
        FROM users 
-       WHERE college_id = ? AND role = 'MENTOR'`,
+       WHERE college_id = ? AND role IN ('MENTOR', 'HOD')`,
       [collegeId]
     );
-    
-    return {
+    console.log("Mentor count SQL result:", mentorRows[0]);
+
+    const stats = {
       department_count: deptRows[0].department_count || 0,
       student_count: studentRows[0].student_count || 0,
       mentor_count: mentorRows[0].mentor_count || 0
     };
+    console.log("Final stats for college:", stats);
+    return stats;
   } catch (error) {
     console.error('Error in getCollegeStats model:', error);
     throw error;

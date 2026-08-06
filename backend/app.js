@@ -11,6 +11,7 @@ const mentorRoutes = require('./routes/mentorRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const collegeRoutes = require('./routes/collegeRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const studentPortfolioRoutes = require('./routes/studentPortfolioRoutes');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -31,6 +32,7 @@ app.use('/api/mentors', mentorRoutes);
 app.use('/api', studentRoutes);
 app.use('/api', collegeRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/students', studentPortfolioRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

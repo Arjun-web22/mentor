@@ -19,10 +19,10 @@ router.get('/students', authenticate, authorize('SUPER_ADMIN', 'HOD', 'MENTOR'),
 
 /**
  * @route   GET /api/students/:registerNo
- * @desc    Get student by register number (SUPER_ADMIN sees all, HOD sees their department, MENTOR sees their own)
- * @access  SUPER_ADMIN, HOD, MENTOR
+ * @desc    Get student by register number (STUDENT sees own, SUPER_ADMIN sees all, HOD sees their department, MENTOR sees their own)
+ * @access  STUDENT, SUPER_ADMIN, HOD, MENTOR
  */
-router.get('/students/:registerNo', authenticate, authorize('SUPER_ADMIN', 'HOD', 'MENTOR'), getStudent);
+router.get('/students/:registerNo', authenticate, authorize('STUDENT', 'SUPER_ADMIN', 'HOD', 'MENTOR'), getStudent);
 
 /**
  * @route   PUT /api/students/:registerNo

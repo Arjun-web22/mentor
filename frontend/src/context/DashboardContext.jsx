@@ -50,9 +50,10 @@ export const DashboardProvider = ({ children }) => {
   ]);
 
   // Map authenticated user to currentUser format
+  // Support both staff (users table) and student (student table) authentication
   const currentUser = authUser ? {
-    id: authUser.user_id,
-    name: authUser.full_name,
+    id: authUser.user_id || authUser.register_no,
+    name: authUser.full_name || authUser.student_name,
     role: authUser.role?.toLowerCase() || 'mentor',
     email: authUser.email,
     avatar: getUserAvatar(),
@@ -60,6 +61,8 @@ export const DashboardProvider = ({ children }) => {
     department_id: authUser.department_id,
     college_id: authUser.college_id,
     staff_id: authUser.staff_id,
+    register_no: authUser.register_no,
+    student_name: authUser.student_name,
   } : null;
 
   const isLoggedIn = !!authUser;

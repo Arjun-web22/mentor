@@ -467,7 +467,7 @@ export const MentorDashboard = () => {
                   <td className="academic-table-td text-right">
                     <div className="flex items-center justify-end space-x-2">
                       <button
-                        onClick={() => navigate(`/students/${st.registerNo}`)}
+                        onClick={() => navigate(`/students/profile/${st.registerNo}`)}
                         className="px-3 py-1.5 bg-[#5B82C5] text-white text-xs font-bold rounded-xl hover:bg-[#4A6FA8] transition-colors"
                       >
                         Profile
@@ -544,7 +544,7 @@ export const MentorDashboard = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate(`/students/${student.registerNo}`)}
+                  onClick={() => navigate(`/students/profile/${student.registerNo}`)}
                   className="w-full py-2.5 bg-[#5B82C5] text-white hover:bg-[#4A6FA8] font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs min-h-[44px]"
                 >
                   <EyeIcon className="w-3.5 h-3.5" /> View Profile

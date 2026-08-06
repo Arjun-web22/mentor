@@ -87,6 +87,13 @@ const getMentorsByDepartmentController = async (req, res) => {
     const { departmentId } = req.params;
     const { collegeId } = req.query;
     
+    console.log("========== BACKEND MENTORS CONTROLLER ==========");
+    console.log("req.params.departmentId:", departmentId);
+    console.log("req.query.collegeId:", collegeId);
+    console.log("req.user.department_id:", req.user.department_id);
+    console.log("req.user.college_id:", req.user.college_id);
+    console.log("req.user.role:", req.user.role);
+    
     // Role-based access control
     if (req.user.role === 'HOD' || req.user.role === 'MENTOR') {
       // HOD and MENTOR can only access their own department

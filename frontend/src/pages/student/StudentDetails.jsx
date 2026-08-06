@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { Badge } from '../../components/common/Badge';
 import { getStudentByRegisterNo, updateStudent } from '../../services/studentService';
+import { formatDate } from '../../utils/dateUtils';
 import {
   UserIcon,
   PencilIcon,
@@ -343,6 +344,30 @@ export const StudentDetails = () => {
                   ) : (
                     <p className="text-sm sm:text-base font-bold text-[#5B82C5]">{student.staff_name || 'Not Assigned'}</p>
                   )}
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <label className="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Date of Birth
+                  </label>
+                  <p className="text-sm sm:text-base font-bold text-gray-900">{formatDate(student.dob)}</p>
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <label className="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Gender
+                  </label>
+                  <p className="text-sm sm:text-base font-bold text-gray-900">{student.gender || 'Not Available'}</p>
+                </div>
+
+                {/* Batch */}
+                <div>
+                  <label className="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Batch
+                  </label>
+                  <p className="text-sm sm:text-base font-bold text-gray-900">{student.batch || 'Not Available'}</p>
                 </div>
               </div>
 

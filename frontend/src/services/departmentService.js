@@ -37,6 +37,11 @@ export const getMentorsByDepartment = async (departmentId, collegeId = null) => 
     const queryString = queryParams.toString();
     const url = queryString ? `/departments/${departmentId}/mentors?${queryString}` : `/departments/${departmentId}/mentors`;
     
+    console.log("========== DEPARTMENT SERVICE ==========");
+    console.log("departmentId:", departmentId);
+    console.log("collegeId:", collegeId);
+    console.log("URL:", url);
+    
     const response = await api.get(url);
     console.log("Mentors API Response:", response.data);
     console.log("Mentors Data:", response.data.data);
