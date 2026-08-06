@@ -60,7 +60,7 @@ const StudentAcademicCard = ({ student }) => {
       {/* Academic Performance Stats */}
       <div className="mt-6 pt-6 border-t border-gray-100">
         <h4 className="text-xs font-black text-gray-700 uppercase tracking-wider mb-4">Academic Performance</h4>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-gradient-to-br from-[#5B82C5]/10 to-[#5B82C5]/5 p-4 rounded-xl border border-[#5B82C5]/20">
             <div className="flex items-center gap-2 mb-2">
               <ChartBarIcon className="w-4 h-4 text-[#5B82C5]" />

@@ -45,7 +45,7 @@ const StudentHero = ({ student, personalInfo, cgpaBadge, psCompletion }) => {
           </div>
 
           {/* Student Info */}
-          <div className="flex-1 text-white space-y-3">
+          <div className="flex-1 w-full text-white space-y-3 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{student?.name || 'Student'}</h1>
               <span className={`px-3 py-1 text-xs font-bold rounded-full border ${cgpaBadge.color}`}>
@@ -79,7 +79,7 @@ const StudentHero = ({ student, personalInfo, cgpaBadge, psCompletion }) => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
             <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl border border-white/30 text-center">
               <p className="text-[10px] font-bold text-white/80 uppercase">CGPA</p>
               <p className="text-xl font-black text-white">{Number(student?.cgpa || 0).toFixed(2)}</p>
