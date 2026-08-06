@@ -419,7 +419,7 @@ export const MentorDashboard = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto hidden md:block">
+        <div className="overflow-x-auto hidden xl:block">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200">
@@ -487,7 +487,7 @@ export const MentorDashboard = () => {
         </div>
 
         {/* Mobile Card View */}
-        <div className="md:hidden space-y-4 p-4">
+        <div className="xl:hidden space-y-4 p-4">
           {filteredMentees.length === 0 ? (
             <div className="text-center py-8 text-gray-500 font-medium">
               No mentee records matched your search query.

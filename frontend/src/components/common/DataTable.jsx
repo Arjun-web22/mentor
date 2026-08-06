@@ -121,7 +121,7 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
       {/* Desktop/Tablet Table View */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden xl:block overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[900px]">
           <thead>
             <tr className="bg-gray-100/90 border-b border-gray-200">
@@ -222,7 +222,7 @@ export const DataTable = ({ students, onOpenCounselingModal }) => {
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-3 p-4">
+      <div className="xl:hidden space-y-3 p-4">
         {paginatedStudents.length === 0 ? (
           <div className="text-center py-8 text-gray-500 font-medium">
             No student records matched the active filter criteria.
