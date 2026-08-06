@@ -129,7 +129,7 @@ export const MentorStudentsDirectory = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 w-full lg:w-auto">
+        <div className="flex items-center flex-wrap gap-3 w-full lg:w-auto">
           {/* View Switch */}
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button

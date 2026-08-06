@@ -520,23 +520,22 @@ export const StudentProfile = () => {
           </ResponsiveContainer>
         </div>
       </div>
+{/* 5. ARREAR TIMELINE SECTION */}
+<ArrearTimeline arrears={student?.arrearsHistory || []} />
 
-      {/* 5. ARREAR TIMELINE SECTION */}
-      <ArrearTimeline arrears={student?.arrearsHistory || []} />
+{/* Placement Readiness Section */}
+<StudentPlacementReadiness
+  student={student}
+  psCompletion={psCompletion}
+  hackathons={hackathons}
+  certifications={certifications}
+  codingProfiles={codingProfiles}
+  placementReadiness={placementReadiness}
+/>
 
-      {/* Placement Readiness Section */}
-      <StudentPlacementReadiness 
-        student={student} 
-        psCompletion={psCompletion} 
-        hackathons={hackathons} 
-        certifications={certifications} 
-        codingProfiles={codingProfiles} 
-        placementReadiness={placementReadiness} 
-      />
-
-      {/* Counselling History */}
-      <StudentTimeline counselingNotes={counselingNotes} />
-
+{/* Counselling History */}
+<StudentTimeline counselingNotes={counselingNotes} />
+  
       {/* Counseling Modal */}
       <AddCounselingModal
         isOpen={isCounselingModalOpen}

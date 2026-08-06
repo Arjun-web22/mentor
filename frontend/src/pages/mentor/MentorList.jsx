@@ -260,7 +260,7 @@ export const MentorList = () => {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -376,6 +376,89 @@ export const MentorList = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3 p-4">
+          {paginatedMentors.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 font-medium">
+              No mentor records matched the active filter criteria.
+            </div>
+          ) : (
+            paginatedMentors.map((mentor) => {
+              const avatar = getMentorAvatar(mentor.full_name);
+              return (
+                <div
+                  key={mentor.user_id}
+                  className="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3"
+                >
+                  <div className="flex items-center space-x-3">
+                    {mentor.profile_photo ? (
+                      <img
+                        src={mentor.profile_photo}
+                        alt={mentor.full_name}
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                      />
+                    ) : avatar ? (
+                      <div
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-sm font-black text-gray-800 border border-gray-200 flex-shrink-0"
+                        style={{ backgroundColor: avatar.backgroundColor }}
+                      >
+                        {avatar.initials}
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gray-200 flex items-center justify-center border border-gray-200 flex-shrink-0">
+                        <UserGroupIcon className="w-6 h-6 text-gray-500" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-sm truncate">{mentor.full_name}</h3>
+                      <span className="text-[11px] font-mono font-bold text-[#5B82C5] bg-[#EBF1FA] px-2 py-0.5 rounded border border-[#5B82C5]/20 inline-block mt-0.5">
+                        {mentor.staff_id}
+                      </span>
+                    </div>
+                    <Badge variant={mentor.is_active ? 'success' : 'danger'} size="sm">
+                      {mentor.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gray-50 p-2 rounded-lg">
+                      <span className="text-[10px] font-bold text-gray-400 block uppercase">Department</span>
+                      <span className="text-xs font-bold text-gray-800 truncate block">{mentor.department_name || 'N/A'}</span>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg">
+                      <span className="text-[10px] font-bold text-gray-400 block uppercase">Designation</span>
+                      <span className="text-xs font-bold text-gray-800 truncate block">{mentor.designation || 'N/A'}</span>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg col-span-2">
+                      <span className="text-[10px] font-bold text-gray-400 block uppercase">Email</span>
+                      <span className="text-xs font-bold text-gray-800 truncate block">{mentor.email}</span>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg col-span-2">
+                      <span className="text-[10px] font-bold text-gray-400 block uppercase">Assigned Students</span>
+                      <span className="text-sm font-black text-gray-900">{mentor.assigned_students || 0}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 pt-1">
+                    <button
+                      onClick={() => navigate(`/mentors/${mentor.user_id}`)}
+                      className="flex-1 px-3 py-2 bg-[#5B82C5] hover:bg-[#4A6FA8] text-white font-bold text-xs rounded-xl transition-all shadow-xs min-h-[44px]"
+                    >
+                      View Profile
+                    </button>
+                    <button
+                      onClick={() => navigate(`/departments/${mentor.department_id}/mentors/${mentor.staff_id}/students`)}
+                      className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-xs rounded-xl transition-all min-h-[44px]"
+                    >
+                      View Students
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
